@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Chillwater Chronicle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..900&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* gradient */
+    --aurora:#9b4fcf;
+    --twilight:#5f7ad9;
+    --tundra:#22c2ae;
+
+    /* functional accents */
+    --violet:#8a3fbf;        /* Lloyd violet - primary / buttons */
+    --violet-deep:#6c2f99;   /* deeper violet - hover */
+    --teal:#1fb3a6;       /* Fit teal - success / "fit" */
+    --teal-deep:#158f85;
+    --coral:#e8615a;         /* Miss coral - error / "miss" */
+    --coral-deep:#c94840;
+    --amber:#e0a63c;         /* Amber needle - timer / attention */
+    --amber-deep:#b9832a;
+
+    /* character accents — shared across all Chillwater games */
+    --lloyd:var(--violet);
+    --berry:var(--twilight);
+    --nutmeg:var(--amber);
+    --yeti:var(--tundra);
+    --walter:#c9705f;
+
+    /* surfaces */
+    --cream:#fdf8ef;     /* Chillwater cream - card surface, light mode */
+    --cream-soft:#e7dcc7;
+    --ink:#241d38;           /* Plum ink - text on light card */
+    --snow:#ffffff;
+    --frost:#d9c9f4;         /* light lavender - text on gradient */
+    --frost-deep:#5f7ad9;    /* twilight blue - accent on cream card */
+    --ink-paper:#241d38;      /* fixed dark ink for always-white paper elements */
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --aurora:#2c1b4a;
+      --twilight:#1e2c52;
+      --tundra:#0d3d3a;
+      --cream:#241d38;      /* Plum ink - card surface, dark mode */
+      --cream-soft:#3a2f56;
+      --ink:#fdf8ef;            /* Chillwater cream - text on dark card */
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:linear-gradient(160deg, var(--aurora) 0%, var(--twilight) 52%, var(--tundra) 100%);
+    background-attachment:fixed;
+    color:var(--ink);
+    font-family:'Lora', serif;
+    min-height:100vh;
+    padding:0 0 60px;
+  }
+  #app{width:100%;max-width:880px;margin:0 auto;padding:24px 14px 0;box-sizing:border-box;}
+
+  /* ---------- Masthead ---------- */
+  header.masthead{
+    position:sticky; top:0; z-index:10;
+    background:rgba(36,29,56,.7);
+    backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    color:var(--snow);
+    border-bottom:3px solid transparent;
+    border-image:linear-gradient(90deg, var(--violet), var(--teal)) 1;
+    padding:.6rem clamp(1rem,3vw,2rem);
+    display:flex; align-items:center; justify-content:space-between; gap:1rem;
+    flex-wrap:wrap;
+    margin:0 0 22px;
+  }
+  .masthead-left{ display:flex; align-items:center; gap:.6rem; }
+  .masthead-title{
+    font-family:'Fraunces', serif;
+    font-weight:900;
+    letter-spacing:-0.01em;
+    font-size:clamp(1.1rem,2.6vw,1.6rem);
+    line-height:1;
+  }
+  .masthead-sub{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:.62rem;
+    letter-spacing:.1em;
+    color:#d9c9f4;
+    text-transform:uppercase;
+    margin-top:.3rem;
+  }
+  .masthead-right{ display:flex; align-items:center; gap:1.1rem; }
+  .ticker{ display:flex; gap:.35rem; align-items:center; flex-wrap:wrap; max-width:140px; }
+  .ticker .dot{
+    width:.6rem; height:.6rem; border-radius:50%;
+    background:rgba(255,255,255,.25);
+  }
+  .ticker .dot.done{ background:var(--teal); }
+  .ticker .dot.active{ background:var(--amber); }
+  .score-box{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:.85rem; letter-spacing:.04em;
+    border:1px solid rgba(255,255,255,.3); padding:.3rem .6rem; border-radius:10px;
+    white-space:nowrap;
+  }
+  .score-box b{ color:#fff; }
+  .score-label{ color:#cbb8e8; font-size:.6rem; letter-spacing:.1em; text-transform:uppercase; display:block; }
+
+  /* ---------- Card shell ---------- */
+  .card{
+    background:var(--cream);
+    border-radius:4px;
+    padding:32px clamp(18px,4vw,44px);
+    box-shadow:0 24px 60px rgba(0,0,0,0.35);
+    position:relative;
+    border:1px solid var(--cream-soft);
+  }
+  .card::before{
+    content:"";
+    position:absolute;top:0;left:0;right:0;height:6px;
+    background:linear-gradient(90deg,var(--aurora),var(--twilight),var(--tundra));
+    border-radius:4px 4px 0 0;
+  }
+  .screen{display:none;}
+  .screen.active{display:block;animation:fadein .35s ease;}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  h2.section-title{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:clamp(24px,4vw,32px);
+    margin:0 0 6px;
+    color:var(--violet);
+  }
+  .kicker{
+    font-family:'IBM Plex Mono', monospace;
+    text-transform:uppercase;
+    letter-spacing:0.14em;
+    font-size:11px;
+    color:#8a5c17;
+    margin-bottom:4px;
+    display:block;
+  }
+  @media (prefers-color-scheme: dark){
+    .kicker{color:#f0b95c;}
+  }
+  p{line-height:1.65;font-size:16px;margin:0 0 14px;}
+  .lede{font-size:18px;font-style:italic;color:#4459b0;}
+  @media (prefers-color-scheme: dark){
+    .lede{color:#93a8ef;}
+  }
+
+  .btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    background:var(--violet);
+    color:#ffffff;
+    border:none;
+    padding:13px 22px;
+    border-radius:3px;
+    cursor:pointer;
+    transition:transform .15s ease, background .15s ease;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .btn:hover{transform:translateY(-2px);background:var(--violet-deep);}
+  .btn:disabled{opacity:0.35;cursor:not-allowed;transform:none;}
+  .btn.amber{background:var(--aurora);}
+  .btn.amber:hover{background:var(--violet-deep);}
+  .btn.ghost{background:transparent;border:1.5px solid var(--violet);color:var(--violet);}
+  @media (prefers-color-scheme: dark){
+    .btn.ghost{border-color:#c9a3ea;color:#c9a3ea;}
+  }
+  .btn-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px;}
+
+  /* ---------- Notebook ---------- */
+  #notebook-toggle{
+    position:fixed;
+    right:18px;
+    bottom:18px;
+    z-index:50;
+    font-family:'IBM Plex Mono', monospace;
+    background:var(--amber-deep);
+    color:#ffffff;
+    border:none;
+    border-radius:30px;
+    padding:12px 18px;
+    font-size:13px;
+    letter-spacing:0.04em;
+    box-shadow:0 8px 24px rgba(0,0,0,0.4);
+    cursor:pointer;
+  }
+  #notebook{
+    position:fixed;
+    top:0;right:-360px;
+    width:340px;max-width:88vw;
+    height:100%;
+    background:var(--snow);
+    color:var(--ink-paper);
+    box-shadow:-12px 0 40px rgba(0,0,0,0.4);
+    padding:26px 22px;
+    overflow-y:auto;
+    transition:right .3s ease;
+    z-index:60;
+  }
+  #notebook.open{right:0;}
+  #notebook h3{
+    font-family:'Fraunces',serif;
+    color:var(--violet);
+    margin-top:0;
+  }
+  #notebook .close{
+    position:absolute;top:16px;right:18px;
+    background:none;border:none;font-size:20px;cursor:pointer;color:var(--coral);
+  }
+  .clue{
+    border:1.5px dashed var(--frost-deep);
+    padding:12px 14px;
+    margin-bottom:12px;
+    border-radius:3px;
+    font-size:13.5px;
+    background:#fff;
+    color:var(--ink-paper);
+    position:relative;
+  }
+  .clue .loc{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--amber-deep);
+    display:block;
+    margin-bottom:5px;
+  }
+  .empty-note{color:#8a8074;font-size:13.5px;font-style:italic;}
+
+  /* ---------- Map screen ---------- */
+  .map-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-top:20px;
+  }
+  @media (max-width:560px){.map-grid{grid-template-columns:1fr;}}
+  .pin{
+    background:var(--snow);
+    color:var(--ink-paper);
+    border:2px solid var(--violet);
+    border-radius:4px;
+    padding:16px;
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease;
+    position:relative;
+  }
+  .pin:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(0,0,0,0.18);}
+  .pin .icon{font-size:26px;}
+  .pin h4{
+    font-family:'Fraunces',serif;
+    margin:8px 0 4px;
+    font-size:17px;
+    color:var(--violet);
+  }
+  .pin .status{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:#9a9182;
+  }
+  .pin.visited{border-color:var(--teal);}
+  .pin.visited .status{color:var(--teal-deep);}
+  .pin.visited::after{
+    content:"✓ VISITED";
+    position:absolute;top:10px;right:10px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:9.5px;
+    color:var(--teal-deep);
+  }
+
+  .modal-backdrop{
+    display:none;
+    position:fixed;inset:0;
+    background:rgba(36,29,56,0.6);
+    z-index:70;
+    align-items:center;justify-content:center;
+    padding:20px;
+  }
+  .modal-backdrop.open{display:flex;}
+  .modal{
+    background:var(--snow);
+    color:var(--ink-paper);
+    max-width:480px;width:100%;
+    padding:26px 24px;
+    border-radius:5px;
+    position:relative;
+  }
+  .modal h4{font-family:'Fraunces',serif;color:var(--violet);margin-top:0;}
+  .stamp{
+    display:inline-block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--teal-deep);
+    border:2px solid var(--teal);
+    padding:4px 10px;
+    border-radius:3px;
+    transform:rotate(-4deg);
+    margin-top:14px;
+  }
+
+  /* ---------- Speech screen ---------- */
+  .clipping{
+    background:#fffdf7;
+    border:1px solid var(--cream-soft);
+    padding:24px;
+    margin-top:16px;
+    font-family:'Lora', serif;
+    color:var(--ink-paper);
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,0.02);
+  }
+  .clipping .para-num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    color:#3f56a8;
+    margin-right:8px;
+  }
+  .clipping p{margin-bottom:16px;}
+  .signoff{font-style:italic;color:#5b5044;}
+
+  /* ---------- Choice / quiz blocks ---------- */
+  .quote-block{
+    background:var(--snow);
+    color:var(--ink-paper);
+    border-left:4px solid var(--violet);
+    padding:14px 18px;
+    margin:18px 0 10px;
+    font-style:italic;
+  }
+  .choice-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+  .choice-btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    letter-spacing:0.03em;
+    background:#fff;
+    border:1.5px solid var(--violet);
+    color:var(--violet);
+    padding:9px 15px;
+    border-radius:3px;
+    cursor:pointer;
+  }
+  .choice-btn:hover{background:var(--violet);color:#fff;}
+  .choice-btn.correct{background:var(--teal);color:#fff;border-color:var(--teal);}
+  .choice-btn.incorrect{background:var(--coral);color:#fff;border-color:var(--coral);}
+  .choice-btn:disabled{cursor:default;}
+  .feedback{
+    font-size:14px;
+    margin-top:10px;
+    padding:10px 14px;
+    border-radius:3px;
+    display:none;
+  }
+  .feedback.show{display:block;}
+  .feedback.good{background:var(--teal);color:#ffffff;}
+  .feedback.bad{background:var(--coral);color:#ffffff;}
+
+  .mcq-option{
+    display:block;
+    width:100%;
+    text-align:left;
+    font-family:'Lora', serif;
+    font-size:15px;
+    background:#fff;
+    color:var(--ink-paper);
+    border:1.5px solid var(--cream-soft);
+    padding:12px 16px;
+    margin-bottom:10px;
+    border-radius:3px;
+    cursor:pointer;
+  }
+  .mcq-option:hover{border-color:var(--violet);}
+  .mcq-option.correct{background:var(--teal);color:#ffffff;border-color:var(--teal);}
+  .mcq-option.incorrect{background:var(--coral);color:#ffffff;border-color:var(--coral);}
+
+  .progress-dots{
+    display:flex;gap:6px;margin-bottom:18px;
+  }
+  .progress-dots span{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--cream-soft);
+  }
+  .progress-dots span.on{background:var(--amber-deep);}
+
+  /* headline cards */
+  .headline-card{
+    background:#fff;
+    color:var(--ink-paper);
+    border:2px solid var(--cream-soft);
+    padding:18px 20px;
+    margin-bottom:14px;
+    border-radius:4px;
+    cursor:pointer;
+  }
+  .headline-card:hover{border-color:var(--amber-deep);}
+  .headline-card h4{
+    font-family:'Fraunces',serif;
+    font-size:20px;
+    margin:0 0 6px;
+    color:var(--violet);
+  }
+  .headline-card .tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    text-transform:uppercase;
+    color:#9a9182;
+  }
+
+  .recap{
+    background:var(--violet);
+    color:#ffffff;
+    padding:22px 24px;
+    border-radius:5px;
+    margin-top:26px;
+  }
+  .recap h3{font-family:'Fraunces',serif;font-weight:700;font-size:20px;margin-top:0;color:#f4c973;}
+  .recap ol{padding-left:20px;line-height:1.8;}
+  .score-line{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    color:var(--frost);
+    margin-top:8px;
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-left">
+    <div>
+      <div class="masthead-title">Chillwater Village, A Frozen Tundra Adventure</div>
+      <div class="masthead-sub">Vol. 3 &mdash; The Chillwater Chronicle</div>
+    </div>
+  </div>
+  <div class="masthead-right">
+    <div class="ticker" id="ticker" aria-hidden="true"></div>
+    <div class="score-box"><span class="score-label">Clues</span><b class="tnum" id="scoreDisplay">0/4</b></div>
+  </div>
+</header>
+
+<div id="app">
+  <!-- SCREEN 1: INTRO -->
+  <section class="screen active" id="screen-intro">
+    <div class="card">
+      <span class="kicker">Your first assignment</span>
+      <h2 class="section-title">Cover the Mayor's Address</h2>
+      <p class="lede">Chillwater, population 311 (plus yetis, who don't fill out census forms).</p>
+      <p>Three nights ago, under record snowfall, the Frostbite Bridge collapsed — the village's only route to the eastern valley. Tonight, Mayor Yeti is giving her first public address since the collapse, and you, the newest hire at the Chronicle, have been sent to cover it.</p>
+      <p>Your editor's only instruction before she hands you your notebook:</p>
+      <p class="lede">"Don't just print what she says. Read it critically."</p>
+      <p>You have some time before the speech starts. Use it well — what you learn now will change what you hear later.</p>
+      <div class="btn-row">
+        <button class="btn amber" onclick="goTo('screen-map')">Start Investigating →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 2: MAP / INVESTIGATION -->
+  <section class="screen" id="screen-map">
+    <div class="card">
+      <span class="kicker">Before the speech</span>
+      <h2 class="section-title">Walk the Village</h2>
+      <p>Visit at least three locations to gather context. An informational or argumentative text is hardest to evaluate when you don't know the background it's speaking into.</p>
+      <div class="map-grid" id="map-grid"></div>
+      <div class="btn-row">
+        <button class="btn amber" id="to-speech-btn" onclick="goTo('screen-speech')" disabled>Head to Town Square for the Speech →</button>
+      </div>
+      <p id="map-hint" style="font-size:13px;color:#8a8074;margin-top:10px;">Visit 3 of 4 locations to unlock the speech.</p>
+    </div>
+  </section>
+
+  <!-- SCREEN 3: THE SPEECH -->
+  <section class="screen" id="screen-speech">
+    <div class="card">
+      <span class="kicker">Town Square, dusk</span>
+      <h2 class="section-title">Mayor Yeti's Address</h2>
+      <p>Read it once for understanding before you do anything else.</p>
+      <div class="clipping">
+        <p><span class="para-num">P1</span>Neighbors of Chillwater — three nights ago, under record snowfall, the Frostbite Bridge gave way. For sixty years that bridge carried every wagon, every sled, every one of us to the eastern valley — longer than any bridge built in these mountains before or since.</p>
+        <p><span class="para-num">P2</span>I have walked the wreckage myself. I have spoken with builders. And I can tell you plainly: this village cannot rebuild the old way. The old way is why we lost it.</p>
+        <p><span class="para-num">P3</span>That is why, starting this spring, I am proposing a new toll bridge — modern, storm-proof, and paid for by a small fee on visitors passing through, not a single coin from your own pockets.</p>
+        <p><span class="para-num">P4</span>Some of you will say Chillwater has never needed a toll before. I say Chillwater has never needed one before because Chillwater has never lost a bridge before.</p>
+        <p><span class="para-num">P5</span>This is the responsible path. This is the only path. And I intend to see it built by first snowfall.</p>
+        <p class="signoff">— Mayor Yeti, delivered from the Town Square steps</p>
+      </div>
+      <div class="btn-row">
+        <button class="btn amber" onclick="goTo('screen-summarize')">Start Your Notes →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 4: SUMMARY + PARAPHRASE -->
+  <section class="screen" id="screen-summarize">
+    <div class="card">
+      <span class="kicker">Reporter's notebook — step 1 &amp; 2</span>
+      <h2 class="section-title">Summarize, Then Paraphrase</h2>
+      <p>A <strong>summary</strong> condenses the whole text in your own words. A <strong>paraphrase</strong> restates one part, at similar length, to clarify meaning — without smuggling in your own opinion.</p>
+
+      <div id="sum-q">
+        <p><strong>Which is the best one-sentence summary of the whole speech?</strong></p>
+        <div class="mcq-option" data-correct="false">The bridge broke, and it's nobody's fault — these things happen in the mountains.</div>
+        <div class="mcq-option" data-correct="true">After the Frostbite Bridge's collapse, Mayor Yeti proposes rebuilding it as a toll bridge funded by visitor fees.</div>
+        <div class="mcq-option" data-correct="false">Mayor Yeti gave a moving, honest speech about the tragedy that struck Chillwater.</div>
+        <div class="feedback" id="sum-feedback"></div>
+      </div>
+
+      <div id="para-q" style="margin-top:26px;">
+        <p><strong>Which best paraphrases P5 ("This is the responsible path. This is the only path.") without adding opinion?</strong></p>
+        <div class="mcq-option" data-correct="false">The mayor admits there might be other reasonable options, but prefers this one.</div>
+        <div class="mcq-option" data-correct="true">The mayor states that this plan is the correct choice and presents no alternative as viable.</div>
+        <div class="mcq-option" data-correct="false">The mayor's plan is clearly the only sensible option for Chillwater.</div>
+        <div class="feedback" id="para-feedback"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn amber" id="to-analyze-btn" onclick="goTo('screen-analyze')" disabled>Analyze the Claims →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 5: FACT / INFERENCE / OPINION -->
+  <section class="screen" id="screen-analyze">
+    <div class="card">
+      <span class="kicker">Reporter's notebook — step 3</span>
+      <h2 class="section-title">Fact, Inference, or Opinion?</h2>
+      <p>Every claim in an argument rests on one of three things: a verifiable <strong>fact</strong>, a credible <strong>inference</strong> drawn from evidence, or an unsubstantiated <strong>opinion</strong>. Tag each line from the speech.</p>
+      <div class="progress-dots" id="analyze-dots"></div>
+      <div id="analyze-container"></div>
+      <div class="btn-row">
+        <button class="btn amber" id="to-match-btn" onclick="goTo('screen-match')" disabled>Map the Rhetorical Situation →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 6: RHETORICAL SITUATION MATCHING -->
+  <section class="screen" id="screen-match">
+    <div class="card">
+      <span class="kicker">Reporter's notebook — step 4</span>
+      <h2 class="section-title">Name the Rhetorical Situation</h2>
+      <p>Six elements shape any text: audience, purpose, genre, stance, context, and culture. For each, pick the description that actually fits Mayor Yeti's address.</p>
+      <div class="progress-dots" id="match-dots"></div>
+      <div id="match-container"></div>
+      <div class="btn-row">
+        <button class="btn amber" id="to-verdict-btn" onclick="goTo('screen-verdict')" disabled>Write Your Story →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 7: VERDICT -->
+  <section class="screen" id="screen-verdict">
+    <div class="card">
+      <span class="kicker">Deadline: tonight</span>
+      <h2 class="section-title">File Your Story</h2>
+      <p>You've read for understanding, summarized, paraphrased, analyzed the claims, and mapped the rhetorical situation. Now evaluate: does the speech accomplish what it claims to? Pick the headline that runs tomorrow.</p>
+
+      <div class="headline-card" onclick="chooseEnding('credulous')">
+        <span class="tag">Draft A</span>
+        <h4>"Mayor Yeti Announces Bold New Bridge Plan"</h4>
+        <p style="margin:0;">Prints the speech straight, no follow-up questions.</p>
+      </div>
+      <div class="headline-card" onclick="chooseEnding('cynical')">
+        <span class="tag">Draft B</span>
+        <h4>"Mayor Yeti's Bridge Plan a Sham, Says Local Reporter"</h4>
+        <p style="margin:0;">Leads with your own conclusion, evidence or not.</p>
+      </div>
+      <div class="headline-card" onclick="chooseEnding('critical')">
+        <span class="tag">Draft C</span>
+        <h4>"Behind the Mayor's Bridge Plan: What She Said, and What She Left Out"</h4>
+        <p style="margin:0;">Weighs the claims against what you found in town.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 8: ENDING -->
+  <section class="screen" id="screen-ending">
+    <div class="card" id="ending-card"></div>
+  </section>
+
+</div>
+
+<button id="notebook-toggle" onclick="toggleNotebook()">📓 Notebook</button>
+<aside id="notebook">
+  <button class="close" onclick="toggleNotebook()">✕</button>
+  <h3>Reporter's Notebook</h3>
+  <div id="clue-list"><p class="empty-note">Nothing collected yet. Go talk to someone in town.</p></div>
+</aside>
+
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+/* ---------------- data ---------------- */
+const locations = [
+  {id:'diner', icon:'🍲', name:"Frosty's Diner", who:"Overheard at the counter",
+   clue:"Old-timers grumble that Yeti's cousin owns the only toll-bridge construction company in three valleys."},
+  {id:'archive', icon:'🗄️', name:"Town Archive", who:"Village budget minutes",
+   clue:"A visitor's tax has been proposed and voted down twice in the last decade — both times over concerns it would just get quietly raised each year."},
+  {id:'bridgesite', icon:'🌉', name:"The Bridge Site", who:"Physical evidence",
+   clue:"A county inspector's report from two winters ago flagged rotting support beams — the bridge was already failing before the storm."},
+  {id:'cabin', icon:'🛖', name:"Snowdrift's Cabin", who:"Oldest resident in Chillwater",
+   clue:"Snowdrift remembers the original bridge was built by volunteer labor in a single summer — no contractors, no tolls."},
+];
+
+const analyzeItems = [
+  {q:"“The Frostbite Bridge gave way three nights ago under record snowfall.”",
+   answer:"Fact", explain:"Verifiable and consistent with what you saw at the Bridge Site — though the inspector's report complicates why it actually failed."},
+  {q:"“That bridge carried us longer than any bridge built in these mountains before or since.”",
+   answer:"Opinion", explain:"There's no evidence offered for this comparison. It sounds like a fact but nothing backs it up — an opinion dressed as fact."},
+  {q:"“The old way is why we lost it.”",
+   answer:"Inference", explain:"A causal claim. It gets more doubtful once you know from the Bridge Site that rotting beams were flagged two winters ago — a cause the speech never mentions."},
+  {q:"“This is the responsible path. This is the only path.”",
+   answer:"Opinion", explain:"A value judgment with no alternatives considered — like only ever seeing the letter from one angle."},
+  {q:"“Paid for by a small fee on visitors passing through, not a single coin from your own pockets.”",
+   answer:"Opinion", explain:"Framed as fact, but nothing confirms residents won't also cross that bridge and pay, or that the fee stays small — especially given the Town Archive's history."},
+  {q:"“I have spoken with builders.”",
+   answer:"Fact", explain:"A verifiable action — though it's vague about which builders, which matters a lot if you've been to Frosty's Diner."},
+];
+
+const matchItems = [
+  {term:"Audience", correct:"The villagers of Chillwater gathered to hear the address.",
+   options:["The villagers of Chillwater gathered to hear the address.","Readers of a history textbook about bridges.","The county inspector who filed the earlier report."]},
+  {term:"Purpose", correct:"To persuade villagers to accept a new toll bridge funded by visitor fees.",
+   options:["To document the bridge's construction for the archive.","To persuade villagers to accept a new toll bridge funded by visitor fees.","To apologize for the bridge's collapse."]},
+  {term:"Genre", correct:"A public address delivered from the town square steps.",
+   options:["A private letter to a friend.","A budget spreadsheet.","A public address delivered from the town square steps."]},
+  {term:"Stance", correct:"Confident and paternal — positioning himself as the only one who has \"walked the wreckage.\"",
+   options:["Confident and paternal — positioning himself as the only one who has \"walked the wreckage.\"","Neutral and data-driven, citing the inspector's report directly.","Apologetic, admitting the toll has failed twice before."]},
+  {term:"Context", correct:"A bridge collapse three days prior, a history of rejected tolls, and an unmentioned inspection report.",
+   options:["A century-old trade dispute with a neighboring village.","A bridge collapse three days prior, a history of rejected tolls, and an unmentioned inspection report.","A recent election Mayor Yeti narrowly lost."]},
+  {term:"Culture", correct:"A village with a tradition of volunteer-built infrastructure and skepticism of new taxes.",
+   options:["A village with a tradition of volunteer-built infrastructure and skepticism of new taxes.","A trading post culture with no fixed leadership.","A village that has always relied on tolls to fund public works."]},
+];
+
+const endings = {
+  credulous:{
+    title:"\"Mayor Yeti Announces Bold New Bridge Plan\"",
+    tag:"What ran",
+    body:"The story goes to print exactly as the mayor delivered it — sixty years of service, record snowfall, a modern solution. It reads well. Two weeks later, a Frosty's Diner regular mentions, a little too loudly, that the mayor's cousin owns the only toll-bridge construction company in three valleys. Someone else remembers the inspection report. The story you filed didn't lie, exactly. It just never asked."
+  },
+  cynical:{
+    title:"\"Mayor Yeti's Bridge Plan a Sham, Says Local Reporter\"",
+    tag:"What ran",
+    body:"Your editor reads it once and hands it back. \"Where's the evidence?\" she asks. You have strong opinions and a real hunch about the cousin — but you never actually verified the contract, and the story leans on outrage instead of facts, inferences, and evidence. It's spiked. Passionate is not the same as sourced."
+  },
+  critical:{
+    title:"\"Behind the Mayor's Bridge Plan: What She Said, and What She Left Out\"",
+    tag:"What ran",
+    body:"The story runs above the fold. It states plainly what's verified (the collapse, the sixty years of use), flags what's inference (the old bridge's cause of failure, given the ignored inspection report), and names what's opinion dressed as certainty (\"the only path\"). It notes the unmentioned family connection without overstating it. Neighbors clip it and pass it around town — not because it agrees with them, but because it's fair. Your editor keeps you on the beat."
+  }
+};
+
+/* ---------------- state ---------------- */
+let visited = new Set();
+let sumDone=false, paraDone=false;
+let analyzeCorrect=0, analyzeTotal=0;
+let matchCorrect=0, matchTotal=0;
+
+const SCREEN_ORDER = ['screen-intro','screen-map','screen-speech','screen-summarize','screen-analyze','screen-match','screen-verdict','screen-ending'];
+const tickerEl = document.getElementById('ticker');
+const scoreDisplay = document.getElementById('scoreDisplay');
+
+function renderTicker(currentId){
+  tickerEl.innerHTML = '';
+  const currentIdx = SCREEN_ORDER.indexOf(currentId);
+  SCREEN_ORDER.forEach((id, i)=>{
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i < currentIdx ? ' done' : (i === currentIdx ? ' active' : ''));
+    tickerEl.appendChild(dot);
+  });
+}
+
+function updateClueCount(){
+  scoreDisplay.textContent = visited.size + '/4';
+}
+
+/* ---------------- navigation ---------------- */
+function goTo(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  renderTicker(id);
+  if(id==='screen-analyze') buildAnalyze();
+  if(id==='screen-match') buildMatch();
+}
+
+function toggleNotebook(){
+  document.getElementById('notebook').classList.toggle('open');
+}
+
+/* ---------------- map screen ---------------- */
+function buildMap(){
+  const grid = document.getElementById('map-grid');
+  grid.innerHTML='';
+  locations.forEach(loc=>{
+    const div = document.createElement('div');
+    div.className='pin';
+    div.id='pin-'+loc.id;
+    div.onclick=()=>openClue(loc);
+    div.innerHTML = `<div class="icon">${loc.icon}</div><h4>${loc.name}</h4><div class="status">${loc.who}</div>`;
+    grid.appendChild(div);
+  });
+}
+
+function openClue(loc){
+  document.getElementById('modal-content').innerHTML = `
+    <h4>${loc.icon} ${loc.name}</h4>
+    <p style="font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;color:#9a9182;letter-spacing:0.06em;">${loc.who}</p>
+    <p>"${loc.clue}"</p>
+    <div class="stamp">Clue collected</div>
+    <div class="btn-row"><button class="btn ghost" onclick="closeModal()">Back to the village</button></div>
+  `;
+  document.getElementById('modal-backdrop').classList.add('open');
+
+  if(!visited.has(loc.id)){
+    visited.add(loc.id);
+    document.getElementById('pin-'+loc.id).classList.add('visited');
+    refreshNotebook();
+    updateClueCount();
+  }
+  updateMapGate();
+}
+
+function closeModal(){
+  document.getElementById('modal-backdrop').classList.remove('open');
+}
+
+function updateMapGate(){
+  const btn = document.getElementById('to-speech-btn');
+  const hint = document.getElementById('map-hint');
+  if(visited.size>=3){
+    btn.disabled=false;
+    hint.textContent = visited.size===4 ? "All four locations visited. Nicely thorough." : "Unlocked — head to Town Square whenever you're ready.";
+  } else {
+    hint.textContent = `Visit 3 of 4 locations to unlock the speech. (${visited.size}/4 so far)`;
+  }
+}
+
+function refreshNotebook(){
+  const list = document.getElementById('clue-list');
+  if(visited.size===0){
+    list.innerHTML = '<p class="empty-note">Nothing collected yet. Go talk to someone in town.</p>';
+    return;
+  }
+  list.innerHTML='';
+  locations.filter(l=>visited.has(l.id)).forEach(l=>{
+    const div=document.createElement('div');
+    div.className='clue';
+    div.innerHTML = `<span class="loc">${l.icon} ${l.name}</span>"${l.clue}"`;
+    list.appendChild(div);
+  });
+}
+
+/* ---------------- summary / paraphrase screen ---------------- */
+function setupMCQBlock(containerId, feedbackId, onCorrect){
+  const container = document.getElementById(containerId);
+  const options = container.querySelectorAll('.mcq-option');
+  options.forEach(opt=>{
+    opt.onclick = ()=>{
+      if(container.dataset.locked) return;
+      container.dataset.locked='true';
+      const isCorrect = opt.dataset.correct==='true';
+      opt.classList.add(isCorrect?'correct':'incorrect');
+      if(!isCorrect){
+        options.forEach(o=>{ if(o.dataset.correct==='true') o.classList.add('correct'); });
+      }
+      const fb = document.getElementById(feedbackId);
+      fb.textContent = isCorrect
+        ? "Right — that stays close to the text without adding a verdict of its own."
+        : "Not quite — notice how the other option stays neutral where this one adds a judgment the speech didn't earn.";
+      fb.className = 'feedback show ' + (isCorrect?'good':'bad');
+      onCorrect();
+    };
+  });
+}
+setupMCQBlock('sum-q','sum-feedback', ()=>{ sumDone=true; checkSummarizeGate(); });
+setupMCQBlock('para-q','para-feedback', ()=>{ paraDone=true; checkSummarizeGate(); });
+function checkSummarizeGate(){
+  document.getElementById('to-analyze-btn').disabled = !(sumDone && paraDone);
+}
+
+/* ---------------- analyze screen ---------------- */
+function buildAnalyze(){
+  const container = document.getElementById('analyze-container');
+  if(container.dataset.built) return;
+  container.dataset.built='true';
+  analyzeTotal = analyzeItems.length;
+
+  const dots = document.getElementById('analyze-dots');
+  analyzeItems.forEach(()=>{ const s=document.createElement('span'); dots.appendChild(s); });
+
+  analyzeItems.forEach((item, idx)=>{
+    const block = document.createElement('div');
+    block.innerHTML = `
+      <div class="quote-block">${item.q}</div>
+      <div class="choice-row" id="analyze-choices-${idx}">
+        <button class="choice-btn" data-val="Fact">Fact</button>
+        <button class="choice-btn" data-val="Inference">Inference</button>
+        <button class="choice-btn" data-val="Opinion">Opinion</button>
+      </div>
+      <div class="feedback" id="analyze-feedback-${idx}"></div>
+    `;
+    container.appendChild(block);
+
+    const btns = block.querySelectorAll('.choice-btn');
+    btns.forEach(btn=>{
+      btn.onclick = ()=>{
+        if(block.dataset.locked) return;
+        block.dataset.locked='true';
+        const val = btn.dataset.val;
+        const correct = val===item.answer;
+        btn.classList.add(correct?'correct':'incorrect');
+        if(!correct){
+          btns.forEach(b=>{ if(b.dataset.val===item.answer) b.classList.add('correct'); });
+        }
+        btns.forEach(b=>b.disabled=true);
+        const fb = document.getElementById(`analyze-feedback-${idx}`);
+        fb.textContent = (correct?"Correct. ":"Actually, this reads as " + item.answer + ". ") + item.explain;
+        fb.className = 'feedback show ' + (correct?'good':'bad');
+        if(correct) analyzeCorrect++;
+        dots.children[idx].classList.add('on');
+        checkAnalyzeGate();
+      };
+    });
+  });
+}
+function checkAnalyzeGate(){
+  const locked = document.querySelectorAll('#analyze-container > div').length;
+  const answered = [...document.querySelectorAll('#analyze-container > div')].filter(d=>d.dataset.locked).length;
+  document.getElementById('to-match-btn').disabled = answered < analyzeTotal;
+}
+
+/* ---------------- match screen ---------------- */
+function shuffle(arr){ return [...arr].sort(()=>Math.random()-0.5); }
+
+function buildMatch(){
+  const container = document.getElementById('match-container');
+  if(container.dataset.built) return;
+  container.dataset.built='true';
+  matchTotal = matchItems.length;
+
+  const dots = document.getElementById('match-dots');
+  matchItems.forEach(()=>{ const s=document.createElement('span'); dots.appendChild(s); });
+
+  matchItems.forEach((item, idx)=>{
+    const block = document.createElement('div');
+    block.style.marginBottom='22px';
+    const opts = shuffle(item.options);
+    block.innerHTML = `<p><strong>${item.term}</strong></p>` +
+      opts.map(o=>`<div class="mcq-option" data-correct="${o===item.correct}">${o}</div>`).join('');
+    container.appendChild(block);
+
+    const options = block.querySelectorAll('.mcq-option');
+    options.forEach(opt=>{
+      opt.onclick=()=>{
+        if(block.dataset.locked) return;
+        block.dataset.locked='true';
+        const correct = opt.dataset.correct==='true';
+        opt.classList.add(correct?'correct':'incorrect');
+        if(!correct){
+          options.forEach(o=>{ if(o.dataset.correct==='true') o.classList.add('correct'); });
+        }
+        if(correct) matchCorrect++;
+        dots.children[idx].classList.add('on');
+        checkMatchGate();
+      };
+    });
+  });
+}
+function checkMatchGate(){
+  const answered = [...document.querySelectorAll('#match-container > div')].filter(d=>d.dataset.locked).length;
+  document.getElementById('to-verdict-btn').disabled = answered < matchTotal;
+}
+
+/* ---------------- ending ---------------- */
+function chooseEnding(kind){
+  const e = endings[kind];
+  const totalScore = analyzeCorrect + matchCorrect;
+  const totalPossible = analyzeItems.length + matchItems.length;
+  document.getElementById('ending-card').innerHTML = `
+    <span class="kicker">${e.tag}</span>
+    <h2 class="section-title">${e.title}</h2>
+    <p>${e.body}</p>
+    <div class="recap">
+      <h3>Your Notebook, Reviewed</h3>
+      <ol>
+        <li><strong>Summary</strong> — restate the whole text's main ideas, in your own words.</li>
+        <li><strong>Paraphrase</strong> — restate one part, at similar length, to clarify meaning.</li>
+        <li><strong>Analyze</strong> — separate fact, inference, and opinion; see how the parts form a whole.</li>
+        <li><strong>Evaluate</strong> — judge whether the text does what it claims, using the rhetorical situation as your yardstick.</li>
+      </ol>
+      <div class="score-line">Claims correctly typed: ${analyzeCorrect}/${analyzeItems.length} · Rhetorical situation matches: ${matchCorrect}/${matchItems.length} · Locations investigated: ${visited.size}/4</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn ghost" onclick="restartGame()">↺ Read It Again</button>
+    </div>
+  `;
+  goTo('screen-ending');
+}
+
+function restartGame(){
+  visited = new Set();
+  sumDone=false; paraDone=false;
+  analyzeCorrect=0; matchCorrect=0;
+  document.querySelectorAll('.pin').forEach(p=>p.classList.remove('visited'));
+  refreshNotebook();
+  updateMapGate();
+  updateClueCount();
+  document.getElementById('to-analyze-btn').disabled = true;
+  document.getElementById('to-match-btn').disabled = true;
+  document.getElementById('to-verdict-btn').disabled = true;
+  ['sum-q','para-q'].forEach(id=>{
+    document.getElementById(id).dataset.locked='';
+    document.querySelectorAll(`#${id} .mcq-option`).forEach(o=>o.classList.remove('correct','incorrect'));
+    document.getElementById(id.replace('-q','-feedback')).className='feedback';
+  });
+  const analyzeC = document.getElementById('analyze-container'); analyzeC.innerHTML=''; analyzeC.dataset.built='';
+  document.getElementById('analyze-dots').innerHTML='';
+  const matchC = document.getElementById('match-container'); matchC.innerHTML=''; matchC.dataset.built='';
+  document.getElementById('match-dots').innerHTML='';
+  goTo('screen-intro');
+}
+
+/* ---------------- init ---------------- */
+buildMap();
+updateMapGate();
+renderTicker('screen-intro');
+updateClueCount();
+document.getElementById('modal-backdrop').addEventListener('click', e=>{
+  if(e.target.id==='modal-backdrop') closeModal();
+});
+</script>
+</body>
+</html>
