@@ -7,12 +7,12 @@
 <title>Inference Trail: A Chillwater Expedition</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo&family=Nunito+Sans:ital,wght@0,400;0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --grad-top:#9b4fcf;
-    --grad-mid:#5f7ad9;
-    --grad-base:#22c2ae;
+    --grad-top:#9c4fd0;
+    --grad-mid:#5f7ada;
+    --grad-base:#22c2af;
     --bg-card:#fdf8ef;
     --ice:#e9f3e9;
     --ice-line:#dfd9d5;
@@ -27,11 +27,11 @@
     --mint-dark:#198f85;
     --mint-pale:#e9f7f6;
     --mint-text:#126860;
-    --coral:#e8615a;
+    --coral:#e9615a;
     --coral-dark:#ba4e48;
     --coral-pale:#fdefee;
     --coral-text:#a2443f;
-    --gold:#e0a63c;
+    --gold:#e0a63e;
     --gold-dark:#b88831;
     --snow:#ffffff;
     --stage-border:#f0ebe4;
@@ -65,7 +65,7 @@
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    font-family:'Nunito', sans-serif;
+    font-family:'Nunito Sans', sans-serif;
     background: linear-gradient(180deg, var(--grad-top) 0%, var(--grad-mid) 50%, var(--grad-base) 100%);
     background-attachment: fixed;
     color:var(--ink);
@@ -87,28 +87,29 @@
     margin:-28px -18px 22px;
   }
   .masthead-title{
-    font-family:'Baloo 2', sans-serif;
-    font-weight:800;
+    font-family:'Baloo', sans-serif;
+    font-weight:400;
     letter-spacing:.01em;
     font-size:clamp(1rem,2.4vw,1.4rem);
     line-height:1;
     color:#fff;
   }
   .masthead-sub{
-    font-family:'Nunito', sans-serif;
-    font-size:.7rem;
-    letter-spacing:.08em;
-    color:#e9dcf7;
+    font-family:'Baloo', sans-serif;
+    font-weight:400;
+    font-size:.75rem;
+    letter-spacing:.04em;
+    color:#e7dbf0;
     text-transform:uppercase;
     margin-top:.25rem;
   }
   .masthead-stage{
-    font-family:'Nunito', sans-serif;
+    font-family:'Nunito Sans', sans-serif;
     font-weight:700;
     font-size:.8rem;
     color:#fff;
     border:1px solid rgba(255,255,255,.3);
-    padding:.3rem .7rem;
+    padding:.65rem .7rem;
     border-radius:999px;
     white-space:nowrap;
   }
@@ -129,19 +130,19 @@
   }
   .trailhead-inner{position:relative; z-index:2;}
   .trail-title{
-    font-family:'Baloo 2', sans-serif;
+    font-family:'Baloo', sans-serif;
     color:#fff;
     font-size:15px;
     letter-spacing:.14em;
     text-transform:uppercase;
-    font-weight:700;
+    font-weight:400;
     opacity:.92;
     margin:0 0 14px;
     text-align:center;
   }
   .trail-path{width:100%; height:auto; display:block;}
   .checkpoint-label{
-    font-family:'Nunito', sans-serif;
+    font-family:'Nunito Sans', sans-serif;
     font-weight:800;
     font-size:11px;
     fill:#ffffff;
@@ -162,8 +163,8 @@
   }
 
   .eyebrow{
-    font-family:'Baloo 2', sans-serif;
-    font-weight:700;
+    font-family:'Baloo', sans-serif;
+    font-weight:400;
     font-size:13px;
     letter-spacing:.12em;
     text-transform:uppercase;
@@ -171,8 +172,8 @@
     margin:0 0 6px;
   }
   h1.stage-title, h2.stage-title{
-    font-family:'Baloo 2', sans-serif;
-    font-weight:800;
+    font-family:'Baloo', sans-serif;
+    font-weight:400;
     font-size:clamp(24px,4vw,32px);
     margin:0 0 16px;
     color:var(--ink);
@@ -208,8 +209,8 @@
   }
   .bubble b{color:var(--purple-text);}
   .speaker-name{
-    font-family:'Baloo 2', sans-serif;
-    font-weight:700;
+    font-family:'Baloo', sans-serif;
+    font-weight:400;
     font-size:13px;
     color:var(--purple-text);
     display:block;
@@ -217,13 +218,27 @@
     letter-spacing:.02em;
   }
 
+  .character-hero{
+    background:var(--mint); border-radius:16px; padding:20px; margin-bottom:1.2rem; color:#fff; overflow:auto;
+  }
+  .character-hero img{
+    height:150px; width:auto; object-fit:contain; border-radius:14px; border:4px solid #fff;
+    box-shadow:0 6px 16px rgba(0,0,0,.25); float:left; margin:0 18px 10px 0;
+  }
+  .character-hero h2{ margin:0 0 4px; font-family:'Baloo', sans-serif; font-weight:400; font-size:1.4rem; color:#fff; }
+  .character-hero .character-tag{
+    display:inline-block; margin:4px 0 8px; font-weight:800; text-transform:uppercase;
+    letter-spacing:.04em; font-size:12px; color:#fff;
+  }
+  .character-hero p{ font-size:14px; margin:6px 0 0; line-height:1.5; color:#fff; }
+
   .essay-link{
     display:inline-flex; align-items:center; gap:8px;
     background:var(--ink-fixed);
     color:#fff !important;
     text-decoration:none;
-    font-weight:800;
-    font-family:'Baloo 2', sans-serif;
+    font-weight:400;
+    font-family:'Baloo', sans-serif;
     font-size:14.5px;
     padding:11px 18px;
     border-radius:100px;
@@ -248,8 +263,8 @@
     font-size:14.5px;
   }
   .clue-q{
-    font-weight:800;
-    font-family:'Baloo 2', sans-serif;
+    font-weight:400;
+    font-family:'Baloo', sans-serif;
     font-size:16.5px;
     margin:0 0 12px;
   }
@@ -293,7 +308,7 @@
 
   textarea, input[type=text]{
     width:100%;
-    font-family:'Nunito', sans-serif;
+    font-family:'Nunito Sans', sans-serif;
     font-size:14.5px;
     border:2px solid var(--ice-line);
     border-radius:12px;
@@ -304,8 +319,8 @@
   }
   textarea:focus, input[type=text]:focus{outline:2px solid var(--purple); border-color:var(--purple);}
   label.field-label{
-    font-weight:800;
-    font-family:'Baloo 2', sans-serif;
+    font-weight:400;
+    font-family:'Baloo', sans-serif;
     font-size:14px;
     display:block;
     margin:16px 0 8px;
@@ -316,8 +331,8 @@
     margin-top:26px; gap:12px; flex-wrap:wrap;
   }
   .btn{
-    font-family:'Baloo 2', sans-serif;
-    font-weight:800;
+    font-family:'Baloo', sans-serif;
+    font-weight:400;
     font-size:15px;
     border:none;
     border-radius:100px;
@@ -342,8 +357,8 @@
 
   .badge-row{display:flex; gap:8px; flex-wrap:wrap; margin:4px 0 2px;}
   .badge{
-    font-family:'Baloo 2', sans-serif;
-    font-weight:700;
+    font-family:'Baloo', sans-serif;
+    font-weight:400;
     font-size:12.5px;
     padding:6px 13px;
     border-radius:100px;
@@ -361,12 +376,12 @@
     border-radius:14px;
     padding:15px 17px;
     cursor:pointer;
-    font-family:'Nunito',sans-serif;
+    font-family:'Nunito Sans', sans-serif;
   }
   .passage-card:hover{border-color:var(--purple);}
   .passage-card.selected{border-color:var(--purple); background:var(--purple-pale);}
   .passage-card .p-title{
-    font-family:'Baloo 2', sans-serif; font-weight:800; font-size:14.5px; color:var(--ink);
+    font-family:'Baloo', sans-serif; font-weight:400; font-size:14.5px; color:var(--ink);
     margin-bottom:4px;
   }
   .passage-card .p-body{font-size:13.5px; color:var(--ink-soft); font-style:italic; line-height:1.5;}
@@ -379,15 +394,15 @@
     margin-bottom:16px;
   }
   .report-label{
-    font-family:'Baloo 2', sans-serif;
-    font-weight:800; font-size:13px; letter-spacing:.06em; text-transform:uppercase;
+    font-family:'Baloo', sans-serif;
+    font-weight:400; font-size:13px; letter-spacing:.06em; text-transform:uppercase;
     color:var(--purple-text); margin-bottom:8px; display:block;
   }
   .score-hero{
     display:flex; align-items:center; gap:18px; margin-bottom:6px;
   }
   .score-num{
-    font-family:'Baloo 2', sans-serif; font-weight:800; font-size:46px; color:var(--purple-text);
+    font-family:'Baloo', sans-serif; font-weight:400; font-size:46px; color:var(--purple-text);
     line-height:1;
   }
   .score-sub{font-size:14px; color:var(--ink-soft); font-weight:700;}
@@ -401,7 +416,7 @@
 
   .icon-btn{
     background:none;border:none;cursor:pointer;color:var(--purple-text);
-    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13.5px;
+    font-family:'Baloo', sans-serif; font-weight:400; font-size:13.5px;
     display:inline-flex; align-items:center; gap:6px; padding:4px 0;
   }
 
@@ -416,7 +431,6 @@
 <body>
 <header class="masthead">
   <div>
-    <div class="masthead-title">Chillwater Village, A Frozen Tundra Adventure</div>
     <div class="masthead-sub">Vol. 2 &mdash; The Inference Trail</div>
   </div>
   <div class="masthead-stage" id="mastheadStage"></div>
@@ -679,13 +693,20 @@ function renderBasecamp(){
   h1.className = "stage-title"; h1.textContent = "Inference Trail: A Chillwater Expedition";
   wrap.appendChild(eyebrow); wrap.appendChild(h1);
 
-  wrap.appendChild(speechRow("yeti","Mayor Yeti", `
-    Welcome to the Rhetoric Expedition Corps! Before any Chillwater guide leads a group across the tundra,
-    they have to know <b>who they're leading</b>. Today's trail runs through an essay called
-    <i>&ldquo;Backpacks vs. Briefcases: Steps toward Rhetorical Analysis&rdquo;</i> by Laura Bolin Carroll.
-    Your job: figure out who Carroll wrote it for, decide whether that's <b>you</b>, and then re-blaze one part
-    of the trail so it's aimed squarely at yourself.
-  `));
+  const yetiHero = document.createElement("div");
+  yetiHero.className = "character-hero";
+  yetiHero.innerHTML = `
+    <img src="${IMG_YETIHERO}" alt="Mayor Yeti">
+    <h2>Mayor Yeti</h2>
+    <span class="character-tag">Rhetoric Expedition Corps</span>
+    <p>&ldquo;Welcome to the Corps! Before any Chillwater guide leads a group across the tundra, they have to know who they're leading.&rdquo;</p>
+  `;
+  wrap.appendChild(yetiHero);
+
+  const introText = document.createElement("p");
+  introText.style.cssText = "font-size:14.5px;color:var(--ink-soft);margin:0 0 18px;line-height:1.55;";
+  introText.innerHTML = `Today's trail runs through an essay called <i>&ldquo;Backpacks vs. Briefcases: Steps toward Rhetorical Analysis&rdquo;</i> by Laura Bolin Carroll. Your job: figure out who Carroll wrote it for, decide whether that's <b>you</b>, and then re-blaze one part of the trail so it's aimed squarely at yourself.`;
+  wrap.appendChild(introText);
 
   const linkBlock = document.createElement("div");
   linkBlock.style.margin = "18px 0 22px";
@@ -862,7 +883,7 @@ function renderFootprints(){
     resDiv.className = "report-block";
     resDiv.innerHTML = `
       <span class="report-label">Berry's read on your footing</span>
-      <p style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:19px;color:${result.color};margin:0 0 8px;">${result.tier}</p>
+      <p style="font-family:'Baloo', sans-serif;font-weight:400;font-size:19px;color:${result.color};margin:0 0 8px;">${result.tier}</p>
       <p style="margin:0;font-size:14.5px;line-height:1.6;">${result.text}</p>
     `;
     wrap.appendChild(resDiv);
@@ -996,7 +1017,7 @@ function renderReport(){
     footBlock.className = "report-block";
     footBlock.innerHTML = `
       <span class="report-label">Check Your Footprints</span>
-      <p style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:18px;color:${result.color};margin:0 0 6px;">${result.tier}</p>
+      <p style="font-family:'Baloo', sans-serif;font-weight:400;font-size:18px;color:${result.color};margin:0 0 6px;">${result.tier}</p>
       <p style="margin:0;font-size:14px;line-height:1.6;color:var(--ink-soft);">${result.text}</p>
     `;
     wrap.appendChild(footBlock);
@@ -1106,12 +1127,12 @@ function showReportFallback(text){
   const box = document.createElement("div");
   box.style.cssText = "background:var(--bg-card);color:var(--ink);border-radius:18px;padding:22px;max-width:520px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,0.3);";
   box.innerHTML = `
-    <p style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:16px;margin:0 0 10px;">Couldn't auto-copy \u2014 select the text below and copy it manually</p>
+    <p style="font-family:'Baloo', sans-serif;font-weight:400;font-size:16px;margin:0 0 10px;">Couldn't auto-copy \u2014 select the text below and copy it manually</p>
   `;
   const ta = document.createElement("textarea");
   ta.value = text;
   ta.readOnly = true;
-  ta.style.cssText = "width:100%;height:220px;font-family:'Nunito',sans-serif;font-size:13px;border:2px solid var(--ice-line);border-radius:10px;padding:10px;";
+  ta.style.cssText = "width:100%;height:220px;font-family:'Nunito Sans', sans-serif;font-size:13px;border:2px solid var(--ice-line);border-radius:10px;padding:10px;";
   box.appendChild(ta);
   const closeBtn = document.createElement("button");
   closeBtn.className = "btn btn-primary";
