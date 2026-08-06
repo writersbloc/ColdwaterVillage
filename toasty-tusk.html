@@ -7,15 +7,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chillwater Village: Fix Walter's Stand</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --aurora:#9b4fcf; --twilight:#5f7ad9; --tundra:#22c2ae;
-    --lloydc:#8a3fbf; --fit:#1fb3a6; --miss:#e8615a; --amber:#e0a63c;
+    --aurora:#9c4fd0; --twilight:#5f7ada; --tundra:#22c2af;
+    --lloydc:#8a3fbf; --fit:#1fb3a6; --miss:#e9615a; --amber:#e0a63e;
     --cream:#fdf8ef; --plum:#241d38;
     --berry: var(--twilight); --nutmeg: var(--amber); --yeti: var(--tundra);
     --walter:#c9705f;
-    --font-display:'Baloo 2', system-ui, sans-serif;
+    --font-display:'Baloo', system-ui, sans-serif;
     --font-body:'Nunito Sans', system-ui, sans-serif;
   }
   *{box-sizing:border-box;}
@@ -27,11 +27,11 @@
     padding:0 0 60px;
   }
   #app{max-width:760px; margin:0 auto; padding:20px 14px 0; box-sizing:border-box;}
-  h1,h2,h3{font-family:var(--font-display); margin:0 0 6px;}
+  h1,h2,h3{font-family:var(--font-display); font-weight:400; margin:0 0 6px;}
   p{line-height:1.5;}
   .card{background:var(--cream); border-radius:18px; padding:22px; box-shadow:0 12px 30px rgba(20,10,40,.25);}
   .btn{
-    font-family:var(--font-display); font-weight:600; font-size:15px; border:none; border-radius:999px;
+    font-family:var(--font-display); font-weight:400; font-size:15px; border:none; border-radius:999px;
     padding:12px 22px; cursor:pointer; color:#fff; background:var(--lloydc);
     box-shadow:0 4px 0 rgba(0,0,0,.15); transition:transform .1s;
   }
@@ -52,7 +52,7 @@
     margin:0 0 16px;
   }
   .village-title{color:#fff; font-family:var(--font-display); font-size:clamp(1rem,2.4vw,1.4rem); text-shadow:0 2px 6px rgba(0,0,0,.25);}
-  .village-title small{display:block; font-family:var(--font-body); font-weight:600; font-size:12px; opacity:.85;}
+  .village-title small{display:block; font-family:var(--font-display); font-weight:400; font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:#e7dbf0; opacity:1;}
   .badge-row{display:flex; gap:8px;}
   .badge-row .badge-icon{opacity:1;}
   .round-dots{display:flex; gap:6px; align-items:center; margin:10px 0 18px;}
@@ -100,7 +100,7 @@
   }
   .pin-zone::after{
     content:attr(data-num); position:absolute; top:-14px; left:-14px; width:28px; height:28px; border-radius:50%;
-    background:var(--amber); color:#fff; font-weight:800; display:flex; align-items:center; justify-content:center;
+    background:var(--miss); color:#fff; font-weight:800; display:flex; align-items:center; justify-content:center;
     font-size:13px; box-shadow:0 3px 8px rgba(0,0,0,.25); animation:pulse 1.8s infinite;
   }
   .pin-zone.solved::after{background:var(--fit); content:'✓'; animation:none;}
@@ -124,12 +124,12 @@
 
   /* diagnose pins */
   .pin{
-    position:absolute; width:34px; height:34px; border-radius:50%; background:var(--amber);
+    position:absolute; width:34px; height:34px; border-radius:50%; background:var(--miss);
     border:3px solid #fff; box-shadow:0 3px 8px rgba(0,0,0,.25); cursor:default;
     display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800;
     animation:pulse 1.8s infinite;
   }
-  @keyframes pulse{0%,100%{box-shadow:0 3px 8px rgba(0,0,0,.25), 0 0 0 0 rgba(224,166,60,.5);}50%{box-shadow:0 3px 8px rgba(0,0,0,.25), 0 0 0 8px rgba(224,166,60,0);}}
+  @keyframes pulse{0%,100%{box-shadow:0 3px 8px rgba(0,0,0,.25), 0 0 0 0 rgba(233,97,90,.5);}50%{box-shadow:0 3px 8px rgba(0,0,0,.25), 0 0 0 8px rgba(233,97,90,0);}}
   .pin.solved{background:var(--fit); animation:none; cursor:default;}
   .pin{cursor:pointer;}
   .pin-label{
@@ -166,7 +166,7 @@
   .capstone-bins .capstone-bin{position:static; font-size:inherit; color:inherit; text-align:left;}
   .capstone-bin.filled-all{border-color:var(--fit); border-style:solid; background:rgba(31,179,166,.06);}
   .capstone-bin .bin-label{min-width:0; flex-shrink:0;}
-  .capstone-bin .name{font-family:var(--font-display); font-weight:700; font-size:13.5px;}
+  .capstone-bin .name{font-family:var(--font-display); font-weight:400; font-size:13.5px;}
   .capstone-bin .bin-count{font-size:10.5px; color:#5a5040; font-weight:700;}
   .bin-checks{margin-left:auto; display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px;}
   .filed-card{
@@ -232,7 +232,7 @@
     width:190px; height:190px; object-fit:cover; border-radius:20px; border:5px solid #fff;
     box-shadow:0 10px 24px rgba(20,10,40,.3);
   }
-  .charter-walt-label{text-align:center; font-family:var(--font-display); font-weight:700; font-size:15px; margin:10px 0 0;}
+  .charter-walt-label{text-align:center; font-family:var(--font-display); font-weight:400; font-size:15px; margin:10px 0 0;}
   .charter-walt-label span{display:block; font-family:var(--font-body); font-weight:600; font-size:12px; color:#5a5040; margin-top:2px;}
 
   .tray-placeholder{visibility:hidden;}
@@ -244,7 +244,7 @@
     border-left:6px solid var(--plum); box-shadow:0 3px 8px rgba(0,0,0,.1); animation:slideIn .3s;
   }
   @keyframes slideIn{from{opacity:0; transform:translateY(6px);}to{opacity:1; transform:translateY(0);}}
-  .advice-card .name{font-family:var(--font-display); font-weight:700; font-size:14px; margin-bottom:2px;}
+  .advice-card .name{font-family:var(--font-display); font-weight:400; font-size:14px; margin-bottom:2px;}
   .advice-card p{margin:0; font-size:13.5px;}
 
   .flavor{font-size:14px; color:#5a5040; margin-bottom:6px;}
@@ -266,15 +266,15 @@
   }
   .crew-card p{font-size:13px; color:#5a5040;}
   .walter-hero{
-    background:var(--walter); border-radius:16px; padding:18px; margin-bottom:22px; color:#fff; overflow:auto;
+    background:var(--miss); border-radius:16px; padding:20px; margin-bottom:1.2rem; color:#fff; overflow:auto;
   }
   .walter-hero img{
-    width:210px; height:210px; object-fit:cover; border-radius:14px; border:4px solid #fff;
-    box-shadow:0 6px 16px rgba(0,0,0,.25); float:left; margin:0 16px 10px 0;
+    height:150px; width:150px; object-fit:cover; border-radius:14px; border:4px solid #fff;
+    box-shadow:0 6px 16px rgba(0,0,0,.25); float:left; margin:0 18px 10px 0;
   }
-  .walter-hero h2{margin-bottom:4px;}
+  .walter-hero h2{margin:0 0 4px; font-size:1.4rem;}
   .walter-hero .principle-tag{background:none; color:#fff; font-weight:800; text-transform:uppercase; letter-spacing:.04em; font-size:12px; display:inline-block; margin:4px 0 8px;}
-  .walter-hero p{font-size:14px; margin:6px 0 0;}
+  .walter-hero p{font-size:14px; margin:6px 0 0; line-height:1.5;}
   .crew-heading{color:var(--plum); margin:4px 0 2px; font-size:13px; text-transform:uppercase; letter-spacing:.06em; font-weight:800; opacity:.7;}
   textarea{
     width:100%; min-height:90px; border-radius:10px; border:2px solid #e7dfce; padding:10px; font-family:var(--font-body);
@@ -543,7 +543,7 @@ function badgeIcon(principle, earned, size){
 function topbarBar(){
   return `
   <div class="topbar">
-    <div class="village-title">Chillwater Village, A Frozen Tundra Adventure
+    <div class="village-title">
       <small>Vol. 4 &mdash; The Redesign Stand</small>
     </div>
     <div class="badge-row">${ORDER.map(p=>badgeIcon(p, state.badgesEarned.has(p))).join('')}</div>
