@@ -5,17 +5,20 @@
 <meta charset="UTF-8" />
 <title>Lloyd's Frozen Tundra — A Rhetorical Situation Game</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo&family=Nunito+Sans:ital,wght@0,400;0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --g1:#9b4fcf; --g2:#5f7ad9; --g3:#22c2ae;
+    --g1:#9c4fd0; --g2:#5f7ada; --g3:#22c2af;
     --bg:#eef1fb;
     --surface:#fdf8ef;
     --surface-soft:#f4e9d2;
     --line:#e3cf9e;
     --text:#2c2340;
     --text-dim:#746a8c;
-    --accent-red:#e8615a;
-    --accent-amber:#e0a63c;
+    --accent-red:#e9615a;
+    --accent-amber:#e0a63e;
     --accent-ok:#1fb3a6;
     --accent-violet:#8a3fbf;
     --shadow:0 20px 44px -22px rgba(50,20,80,.45);
@@ -54,15 +57,15 @@
     --header-bg:rgba(10,6,20,.6);
   }
   :root[data-theme="light"]{
-    --g1:#9b4fcf; --g2:#5f7ad9; --g3:#22c2ae;
+    --g1:#9c4fd0; --g2:#5f7ada; --g3:#22c2af;
     --bg:#eef1fb;
     --surface:#fdf8ef;
     --surface-soft:#f4e9d2;
     --line:#e3cf9e;
     --text:#2c2340;
     --text-dim:#746a8c;
-    --accent-red:#e8615a;
-    --accent-amber:#e0a63c;
+    --accent-red:#e9615a;
+    --accent-amber:#e0a63e;
     --accent-ok:#1fb3a6;
     --accent-violet:#8a3fbf;
     --shadow:0 20px 44px -22px rgba(50,20,80,.45);
@@ -74,7 +77,7 @@
   body{
     background:linear-gradient(180deg, var(--g1) 0%, var(--g2) 46%, var(--g3) 100%) fixed;
     color:var(--text);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    font-family:'Nunito Sans', -apple-system, sans-serif;
     min-height:100vh;
     -webkit-font-smoothing:antialiased;
   }
@@ -82,7 +85,7 @@
   p{ margin:0; }
   button{ font-family:inherit; }
   .display{
-    font-family:ui-rounded,"SF Pro Rounded","Segoe UI Rounded",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+    font-family:'Baloo', ui-rounded, sans-serif;
   }
   .mono{
     font-family:ui-monospace,'SF Mono','Cascadia Code',Menlo,Consolas,monospace;
@@ -102,17 +105,18 @@
   }
   .masthead-left{ display:flex; align-items:center; gap:.6rem; }
   .masthead-title{
-    font-family:ui-rounded,"SF Pro Rounded","Segoe UI Rounded",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
-    font-weight:800;
+    font-family:'Baloo', ui-rounded, sans-serif;
+    font-weight:400;
     letter-spacing:.01em;
     font-size:clamp(1rem,2.4vw,1.4rem);
     line-height:1;
   }
   .masthead-sub{
-    font-family:ui-monospace,'SF Mono','Cascadia Code',Menlo,Consolas,monospace;
-    font-size:.62rem;
-    letter-spacing:.1em;
-    color:#d8c8f0;
+    font-family:'Baloo', sans-serif;
+    font-weight:400;
+    font-size:.75rem;
+    letter-spacing:.04em;
+    color:#e7dbf0;
     text-transform:uppercase;
     margin-top:.2rem;
   }
@@ -164,8 +168,8 @@
     color:var(--accent-violet); margin-bottom:.6rem; display:block;
   }
   .headline{
-    font-family:ui-rounded,"SF Pro Rounded","Segoe UI Rounded",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
-    font-weight:800; letter-spacing:0;
+    font-family:'Baloo', ui-rounded, sans-serif;
+    font-weight:400; letter-spacing:0;
     font-size:clamp(1.5rem,4.4vw,2.4rem);
     line-height:1.08; margin-bottom:.9rem;
   }
@@ -173,10 +177,24 @@
   .lede + .lede{ margin-top:.8rem; }
   .dim{ color:var(--text-dim); }
 
+  .character-hero{
+    background:var(--accent-violet); border-radius:16px; padding:20px; margin-bottom:1.2rem; color:#fff; overflow:auto;
+  }
+  .character-hero img{
+    height:150px; width:auto; object-fit:contain; border-radius:14px; border:4px solid #fff;
+    box-shadow:0 6px 16px rgba(0,0,0,.25); float:left; margin:0 18px 10px 0;
+  }
+  .character-hero h2{ margin:0 0 4px; font-family:'Baloo', ui-rounded, sans-serif; font-weight:400; font-size:1.4rem; color:#fff; }
+  .character-hero .character-tag{
+    display:inline-block; margin:4px 0 8px; font-weight:800; text-transform:uppercase;
+    letter-spacing:.04em; font-size:12px; color:#fff;
+  }
+  .character-hero p{ font-size:14px; margin:6px 0 0; line-height:1.5; color:#fff; }
+
   .btn{
     display:inline-flex; align-items:center; justify-content:center; gap:.4rem;
-    font-family:ui-rounded,"SF Pro Rounded","Segoe UI Rounded",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
-    font-weight:800; letter-spacing:.01em; font-size:.92rem;
+    font-family:'Baloo', ui-rounded, sans-serif;
+    font-weight:400; letter-spacing:.01em; font-size:.92rem;
     border:2px solid var(--accent-violet); background:transparent; color:var(--accent-violet);
     padding:.75rem 1.5rem; border-radius:999px; cursor:pointer;
     transition:transform .12s ease, background .12s ease, color .12s ease;
@@ -269,7 +287,7 @@
   .feedback.hit{ border-color:var(--accent-ok); }
   .feedback.miss{ border-color:var(--accent-red); }
   .stamp{
-    font-family:ui-rounded,"SF Pro Rounded","Segoe UI Rounded",-apple-system,sans-serif; font-weight:800; letter-spacing:.01em;
+    font-family:'Baloo', ui-rounded, sans-serif; font-weight:400; letter-spacing:.01em;
     font-size:1.05rem; display:inline-block; margin-bottom:.35rem;
   }
   .feedback.hit .stamp{ color:var(--accent-ok); }
@@ -306,7 +324,7 @@
   .glossary .term{ font-family:ui-monospace,monospace; font-weight:700; font-size:.82rem; color:var(--accent-violet); letter-spacing:.06em; text-transform:uppercase; }
   .rank-badge{
     display:inline-block; margin:.6rem 0 .2rem;
-    font-family:ui-rounded,"SF Pro Rounded","Segoe UI Rounded",-apple-system,sans-serif; font-weight:800;
+    font-family:'Baloo', ui-rounded, sans-serif; font-weight:400;
     font-size:clamp(1.3rem,4vw,1.9rem); letter-spacing:0; color:var(--accent-violet);
   }
   footer.cite{
@@ -322,7 +340,6 @@
 <header class="masthead">
   <div class="masthead-left" id="headerMascotSlot">
     <div>
-      <div class="masthead-title">Chillwater Village, A Frozen Tundra Adventure</div>
       <div class="masthead-sub">Vol. 1 &mdash; The Exigence Outpost</div>
     </div>
   </div>
@@ -334,9 +351,6 @@
 
 <main id="stage"></main>
 
-<footer class="cite">
-  <div>Based on Lloyd F. Bitzer, "The Rhetorical Situation," <em>Philosophy &amp; Rhetoric</em> 1.1 (1968): 1&ndash;14. Lloyd, Nutmeg, Walter, Berry, and the rest of Chillwater Village are original and just here to make the theory stick.</div>
-</footer>
 
 <script>
 (function(){
@@ -351,7 +365,10 @@
     var h = Math.round(size * (553/338));
     return '<img class="llama-mascot" src="'+LLAMA_SRC+'" width="'+size+'" height="'+h+'" alt="Lloyd the Llama" style="width:'+size+'px;height:'+h+'px;" />';
   }
-  document.getElementById('headerMascotSlot').insertAdjacentHTML('afterbegin', llamaSVG(38));
+  var BITZER_SRC = 'https://upload.wikimedia.org/wikipedia/en/e/ee/LloydF.Bitzer.png';
+  function bitzerPhoto(size){
+    return '<img class="llama-mascot" src="'+BITZER_SRC+'" width="'+size+'" height="'+size+'" alt="Lloyd F. Bitzer" style="width:'+size+'px;height:'+size+'px;object-fit:cover;border-radius:10px;" />';
+  }
 
   var STATE = {
     screen:'start',
@@ -546,12 +563,14 @@
     stage.innerHTML = '';
     var card = el(
       '<section class="case-card">'+
-        '<div class="hero-mascot-row">'+llamaSVG(76)+
-          '<div><span class="eyebrow" style="margin-bottom:.2rem;">Chillwater Village, Frozen Tundra</span>'+
-          '<h1 class="headline" style="margin-bottom:0;">Lloyd needs the right words.</h1></div>'+
+        '<h1 class="headline">Lloyd needs the right words.</h1>'+
+        '<div class="character-hero">'+
+          '<img src="'+LLAMA_SRC+'" alt="Lloyd the Llama">'+
+          '<h2>Lloyd the Llama</h2>'+
+          '<span class="character-tag">Chillwater Village’s Go-To Wordsmith</span>'+
+          '<p>“Even I have to take time to think before I pick my words: what’s the urgency here? Who can act? And what’s already true that my words have to work around?”</p>'+
         '</div>'+
-        '<p class="lede">Lloyd the Llama is the critter everyone in Chillwater Village comes to when something needs saying. But even Lloyd has to take time to think before he picks his words: what’s the urgency here? Who can act? And what’s already true that his words have to work around?</p>'+
-        '<p class="lede">You’re helping Lloyd today. Five tundra tales, one very good llama. And his namesake? Lloyd Bitzer, of course. That’s the real story behind what unfolds here, it’s theory straight from Lloyd Bitzer’s 1968 essay "The Rhetorical Situation" — just with a lot more marshmallows.</p>'+
+        '<p class="lede">You’re helping Lloyd today. Five tundra tales, one very good llama. And his namesake? Lloyd Bitzer, of course. That’s the real story behind what unfolds here, it’s theory straight from Lloyd Bitzer’s 1968 essay <a href="https://www.jstor.org/stable/40236733" target="_blank" rel="noopener">"The Rhetorical Situation"</a> — just with a lot more marshmallows.</p>'+
         '<div class="actions"><button class="btn primary" id="startBtn">Meet Lloyd</button></div>'+
       '</section>'
     );
@@ -568,7 +587,7 @@
       '<section class="case-card">'+
         '<span class="eyebrow">The Scholar Behind the Story</span>'+
         '<div class="hero-mascot-row">'+
-          llamaSVG(76)+
+          bitzerPhoto(110)+
           '<div><h2 class="headline" style="margin-bottom:0;">Meet the real Lloyd</h2></div>'+
         '</div>'+
         '<p class="lede">Lloyd F. Bitzer taught rhetoric at the University of Wisconsin–Madison. In 1968, he published a short essay called "The Rhetorical Situation" that asked a question rhetoric hadn’t really asked before: not just what makes a speech persuasive, but what in the world actually calls a response into being in the first place.</p>'+
@@ -1014,6 +1033,8 @@
         flavorText.textContent = 'Lloyd’s timing is sharp. One more skill before he calls it a day.';
         track.querySelectorAll('.zone').forEach(function(z){ z.remove(); });
         needle.style.left='0%';
+        track.style.display = 'none';
+        card.querySelector('.track-labels').style.display = 'none';
         actionBtn.style.display = 'none';
         fbSlot4.innerHTML = '';
         nextBtn4.style.display = 'none';
