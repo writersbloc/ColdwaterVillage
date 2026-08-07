@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -39,7 +40,7 @@
     --essay-hover:#1a1528;
     --mountain-fill:#18887a;
     --shadow: 0 12px 28px rgba(36,29,56,0.14);
-    --radius: 22px;
+    --radius: 4px;
   }
   @media (prefers-color-scheme: dark){
     :root{
@@ -109,7 +110,7 @@
     color:#fff;
     border:1px solid rgba(255,255,255,.3);
     padding:.65rem .7rem;
-    border-radius:999px;
+    border-radius:3px;
     white-space:nowrap;
   }
 
@@ -117,7 +118,7 @@
   .trailhead{
     position:relative;
     background:linear-gradient(180deg, var(--grad-top) 0%, var(--grad-mid) 55%, var(--grad-base) 100%);
-    border-radius: 28px;
+    border-radius: 4px;
     padding:26px 22px 18px;
     overflow:hidden;
     box-shadow: var(--shadow);
@@ -199,7 +200,7 @@
   .bubble{
     flex:1 1 auto;
     background:var(--purple-pale);
-    border-radius:18px 18px 18px 4px;
+    border-radius:4px 4px 4px 2px;
     padding:14px 18px;
     font-size:15.5px;
     line-height:1.55;
@@ -218,10 +219,10 @@
   }
 
   .character-hero{
-    background:var(--mint); border-radius:16px; padding:20px; margin-bottom:1.2rem; color:#fff; overflow:auto;
+    background:var(--mint); border-radius:4px; padding:20px; margin-bottom:1.2rem; color:#fff; overflow:auto;
   }
   .character-hero img{
-    height:150px; width:150px; object-fit:cover; border-radius:14px; border:4px solid #fff;
+    height:150px; width:150px; object-fit:cover; border-radius:4px; border:4px solid #fff;
     box-shadow:0 6px 16px rgba(0,0,0,.25); float:left; margin:0 18px 10px 0;
   }
   .character-hero h2{ margin:0 0 4px; font-family:'Baloo', sans-serif; font-weight:400; font-size:1.4rem; color:#fff; }
@@ -240,7 +241,7 @@
     font-family:'Baloo', sans-serif;
     font-size:14.5px;
     padding:11px 18px;
-    border-radius:100px;
+    border-radius:3px;
     margin:6px 0 4px;
     transition: transform .15s ease, background .15s ease;
   }
@@ -249,7 +250,7 @@
   .clue-block{
     background:var(--ice);
     border:1.5px solid var(--ice-line);
-    border-radius:16px;
+    border-radius:4px;
     padding:18px 20px;
     margin-bottom:18px;
   }
@@ -272,7 +273,7 @@
     display:flex; align-items:center; gap:10px;
     background:var(--bg-card);
     border:2px solid var(--ice-line);
-    border-radius:12px;
+    border-radius:4px;
     padding:11px 14px;
     cursor:pointer;
     font-size:14.5px;
@@ -297,7 +298,7 @@
     margin-top:12px;
     font-size:14px;
     padding:11px 14px;
-    border-radius:10px;
+    border-radius:4px;
     display:none;
     line-height:1.5;
   }
@@ -310,7 +311,7 @@
     font-family:'Nunito Sans', sans-serif;
     font-size:14.5px;
     border:2px solid var(--ice-line);
-    border-radius:12px;
+    border-radius:4px;
     padding:12px 14px;
     resize:vertical;
     color:var(--ink);
@@ -334,7 +335,7 @@
     font-weight:400;
     font-size:15px;
     border:none;
-    border-radius:100px;
+    border-radius:3px;
     padding:13px 26px;
     cursor:pointer;
     transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
@@ -360,7 +361,7 @@
     font-weight:400;
     font-size:12.5px;
     padding:6px 13px;
-    border-radius:100px;
+    border-radius:10px;
     background:var(--ice);
     color:var(--mint-text);
   }
@@ -372,7 +373,7 @@
     text-align:left;
     background:var(--bg-card);
     border:2px solid var(--ice-line);
-    border-radius:14px;
+    border-radius:4px;
     padding:15px 17px;
     cursor:pointer;
     font-family:'Nunito Sans', sans-serif;
@@ -388,7 +389,7 @@
   .report-block{
     background:var(--ice);
     border:1.5px solid var(--ice-line);
-    border-radius:16px;
+    border-radius:4px;
     padding:18px 20px;
     margin-bottom:16px;
   }
@@ -423,7 +424,7 @@
 
   @media (max-width:480px){
     .speech-row{flex-direction:column; align-items:center; text-align:center;}
-    .bubble{border-radius:18px;}
+    .bubble{border-radius:4px;}
   }
 </style>
 </head>
@@ -1122,14 +1123,14 @@ function showReportFallback(text){
   overlay.id = "fallbackOverlay";
   overlay.style.cssText = "position:fixed;inset:0;background:rgba(22,48,58,0.55);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px;";
   const box = document.createElement("div");
-  box.style.cssText = "background:var(--bg-card);color:var(--ink);border-radius:18px;padding:22px;max-width:520px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,0.3);";
+  box.style.cssText = "background:var(--bg-card);color:var(--ink);border-radius:5px;padding:22px;max-width:520px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,0.3);";
   box.innerHTML = `
     <p style="font-family:'Baloo', sans-serif;font-weight:400;font-size:16px;margin:0 0 10px;">Couldn't auto-copy \u2014 select the text below and copy it manually</p>
   `;
   const ta = document.createElement("textarea");
   ta.value = text;
   ta.readOnly = true;
-  ta.style.cssText = "width:100%;height:220px;font-family:'Nunito Sans', sans-serif;font-size:13px;border:2px solid var(--ice-line);border-radius:10px;padding:10px;";
+  ta.style.cssText = "width:100%;height:220px;font-family:'Nunito Sans', sans-serif;font-size:13px;border:2px solid var(--ice-line);border-radius:4px;padding:10px;";
   box.appendChild(ta);
   const closeBtn = document.createElement("button");
   closeBtn.className = "btn btn-primary";
