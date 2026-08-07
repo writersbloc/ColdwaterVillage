@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Lloyd's Frozen Tundra — A Rhetorical Situation Game</title>
+<title>Vol. 1 — The Exigence Outpost</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -138,7 +138,7 @@
   .score-label{ color:#cbb8e8; font-size:.62rem; letter-spacing:.1em; text-transform:uppercase; display:block; }
 
   main#stage{
-    max-width:880px; margin:0 auto; padding:clamp(1.5rem,4vw,3.2rem) clamp(1rem,4vw,1.5rem) 4rem;
+    max-width:880px; margin:0 auto; padding:clamp(1.5rem,4vw,3.2rem) clamp(1rem,4vw,1.5rem) 8rem;
   }
 
   .llama-mascot{ display:block; flex-shrink:0; }
@@ -239,6 +239,8 @@
     background:var(--surface); border:1.5px solid var(--text); color:var(--text);
     padding:.6rem .8rem; border-radius:4px; cursor:grab; max-width:22rem;
   }
+  .tile.dragging{ cursor:grabbing; box-shadow:0 10px 20px rgba(0,0,0,.3); }
+  .tile-placeholder{ visibility:hidden; }
   .tile.selected{ border-color:var(--accent-amber); box-shadow:0 0 0 2px var(--accent-amber) inset; }
   .tile.correct{ border-color:var(--accent-ok); }
   .tile.incorrect{ border-color:var(--accent-red); }
@@ -303,7 +305,7 @@
   .feedback p{ font-size:.92rem; line-height:1.5; }
 
   .track{
-    position:relative; height:2.6rem; border-radius:4px; overflow:hidden;
+    position:relative; height:3.4rem; border-radius:4px; overflow:hidden;
     border:2px solid var(--text); margin-top:1.3rem; display:flex;
   }
   .zone{ height:100%; }
@@ -311,15 +313,16 @@
   .zone.fit{ background:color-mix(in srgb, var(--accent-ok) 40%, var(--surface)); }
   .zone.late{ background:color-mix(in srgb, var(--accent-red) 26%, var(--surface)); }
   .needle{
-    position:absolute; top:0; bottom:0; width:3px; background:var(--text);
-    left:0%;
-  }
-  .needle::after{
-    content:""; position:absolute; top:-.4rem; left:50%; transform:translateX(-50%);
-    border-left:.4rem solid transparent; border-right:.4rem solid transparent;
-    border-top:.5rem solid var(--text);
+    position:absolute; top:50%; left:0%; width:2.6rem; height:2.6rem;
+    transform:translate(-50%,-50%);
+    background-image:url('data:image/png;base64,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');
+    background-size:contain; background-repeat:no-repeat; background-position:center;
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));
   }
   .track-labels{ display:flex; justify-content:space-between; font-family:ui-monospace,monospace; font-size:.62rem; letter-spacing:.06em; color:var(--text-dim); text-transform:uppercase; margin-top:.4rem; }
+  .needle.pickable{ cursor:pointer; }
+  .needle.pickable:hover{ transform:translate(-50%,-50%) scale(1.12); }
+  .needle.pickable:active{ transform:translate(-50%,-50%) scale(0.95); }
 
   .glossary{ display:flex; flex-direction:column; gap:.9rem; margin-top:1.2rem; }
   .glossary .term{ font-family:ui-monospace,monospace; font-weight:700; font-size:.82rem; color:var(--accent-violet); letter-spacing:.06em; text-transform:uppercase; }
@@ -359,8 +362,7 @@
   var LLAMA_SRC = 'https://raw.githubusercontent.com/writersbloc/ColdwaterVillage/main/Toasty%20Tusk/Lloyd.png';
   var LLOYD_STAND_SRC = "https://raw.githubusercontent.com/writersbloc/ColdwaterVillage/main/Toasty%20Tusk/Lloyd.png";
   function llamaSVG(size){
-    var h = Math.round(size * (553/338));
-    return '<img class="llama-mascot" src="'+LLAMA_SRC+'" width="'+size+'" height="'+h+'" alt="Lloyd the Llama" style="width:'+size+'px;height:'+h+'px;" />';
+    return '<img class="llama-mascot" src="'+LLAMA_SRC+'" width="'+size+'" height="'+size+'" alt="Lloyd the Llama" style="width:'+size+'px;height:'+size+'px;object-fit:cover;border-radius:4px;" />';
   }
   var BITZER_SRC = 'https://raw.githubusercontent.com/writersbloc/ColdwaterVillage/main/Toasty%20Tusk/Lloyd%20B.png';
   function bitzerPhoto(size){
@@ -584,7 +586,7 @@
       '<section class="case-card">'+
         '<span class="eyebrow">The Scholar Behind the Story</span>'+
         '<div class="hero-mascot-row">'+
-          bitzerPhoto(110)+
+          bitzerPhoto(150)+
           '<div><h2 class="headline" style="margin-bottom:0;">Meet the real Lloyd</h2></div>'+
         '</div>'+
         '<p class="lede">Lloyd F. Bitzer taught rhetoric at the University of Wisconsin–Madison. In 1968, he published a short essay called "The Rhetorical Situation" that asked a question rhetoric hadn’t really asked before: not just what makes a speech persuasive, but what in the world actually calls a response into being in the first place.</p>'+
@@ -644,20 +646,118 @@
     var checkBtn = card.querySelector('#checkBtn');
     var contBtn = card.querySelector('#contBtn');
 
+    function enableTileDrag(tile, onRelease){
+      tile.style.touchAction = 'none';
+      tile.addEventListener('pointerdown', function(e){
+        if(checked) return;
+        e.preventDefault();
+        var startX = e.clientX, startY = e.clientY;
+        var tapThreshold = e.pointerType === 'touch' ? 18 : 6;
+        var rect = tile.getBoundingClientRect();
+        var dx = startX - rect.left, dy = startY - rect.top;
+        var parent = tile.parentNode, next = tile.nextSibling;
+        var ph = document.createElement('div');
+        ph.className = 'tile-placeholder';
+        ph.style.width = rect.width+'px'; ph.style.height = rect.height+'px';
+        parent.insertBefore(ph, tile);
+        document.body.appendChild(tile);
+        tile.style.position = 'fixed'; tile.style.left = rect.left+'px'; tile.style.top = rect.top+'px';
+        tile.style.width = rect.width+'px'; tile.style.zIndex = 999;
+        tile.style.pointerEvents = 'none';
+        tile.classList.add('dragging');
+        try{ tile.setPointerCapture(e.pointerId); }catch(err){}
+
+        var maxDist = 0, hoverBin = null;
+        var scrollRAF = null, scrollSpeed = 0, lastClientY = startY;
+        function clearHover(){
+          if(hoverBin){ hoverBin.classList.remove('dragover'); hoverBin = null; }
+        }
+        function updateAutoScroll(clientY){
+          var edge = 70, vh = window.innerHeight;
+          if(clientY < edge){
+            scrollSpeed = -Math.round((edge - clientY) * 0.6);
+          } else if(clientY > vh - edge){
+            scrollSpeed = Math.round((clientY - (vh - edge)) * 0.6);
+          } else {
+            scrollSpeed = 0;
+          }
+          if(scrollSpeed !== 0 && !scrollRAF){
+            (function step(){
+              window.scrollBy(0, scrollSpeed);
+              tile.style.top = (lastClientY-dy)+'px';
+              scrollRAF = requestAnimationFrame(step);
+            })();
+          } else if(scrollSpeed === 0 && scrollRAF){
+            cancelAnimationFrame(scrollRAF);
+            scrollRAF = null;
+          }
+        }
+        function move(ev){
+          var d = Math.hypot(ev.clientX-startX, ev.clientY-startY);
+          if(d > maxDist) maxDist = d;
+          lastClientY = ev.clientY;
+          tile.style.left = (ev.clientX-dx)+'px';
+          tile.style.top = (ev.clientY-dy)+'px';
+          updateAutoScroll(ev.clientY);
+          var el = document.elementFromPoint(ev.clientX, ev.clientY);
+          var bin = el ? el.closest('.bin') : null;
+          if(bin !== hoverBin){ clearHover(); if(bin){ bin.classList.add('dragover'); hoverBin = bin; } }
+        }
+        function cleanup(){
+          tile.removeEventListener('pointermove', move);
+          tile.removeEventListener('pointerup', up);
+          tile.removeEventListener('pointercancel', cancel);
+          tile.removeEventListener('lostpointercapture', cancel);
+          tile.classList.remove('dragging');
+          clearHover();
+          if(scrollRAF){ cancelAnimationFrame(scrollRAF); scrollRAF = null; }
+          tile.style.pointerEvents = '';
+          tile.style.position = ''; tile.style.left = ''; tile.style.top = ''; tile.style.width = ''; tile.style.zIndex = '';
+        }
+        function cancel(){
+          if(!tile.classList.contains('dragging')) return;
+          cleanup();
+          parent.insertBefore(tile, next && next.parentNode ? next : null);
+          ph.remove();
+        }
+        function up(ev){
+          var finalDist = Math.max(maxDist, Math.hypot(ev.clientX-startX, ev.clientY-startY));
+          var bin = null;
+          if(finalDist >= tapThreshold){
+            var el = document.elementFromPoint(ev.clientX, ev.clientY);
+            bin = el ? el.closest('.bin') : null;
+          }
+          cleanup();
+          parent.insertBefore(tile, next && next.parentNode ? next : null);
+          ph.remove();
+          if(finalDist < tapThreshold){
+            onRelease(null);
+            return;
+          }
+          onRelease(bin ? bin.dataset.bin : null);
+        }
+        tile.addEventListener('pointermove', move);
+        tile.addEventListener('pointerup', up);
+        tile.addEventListener('pointercancel', cancel);
+        tile.addEventListener('lostpointercapture', cancel);
+      });
+    }
+
     function makeTileEl(tile){
       var t = document.createElement('div');
       t.className = 'tile';
       t.textContent = tile.text;
-      t.setAttribute('draggable','true');
       t.dataset.id = tile.id;
       t.tabIndex = 0;
-      t.addEventListener('click', function(){
+      enableTileDrag(t, function(binId){
         if(checked) return;
-        selected = (selected === tile.id) ? null : tile.id;
+        if(binId){
+          assignments[tile.id] = binId;
+          selected = null;
+        } else {
+          selected = (selected === tile.id) ? null : tile.id;
+        }
         draw();
-      });
-      t.addEventListener('dragstart', function(ev){
-        ev.dataTransfer.setData('text/plain', tile.id);
       });
       if(selected === tile.id) t.classList.add('selected');
       if(checked){
@@ -667,22 +767,15 @@
     }
 
     function makeBinTarget(container, binId){
-      container.addEventListener('dragover', function(ev){ ev.preventDefault(); container.classList.add('dragover'); });
-      container.addEventListener('dragleave', function(){ container.classList.remove('dragover'); });
-      container.addEventListener('drop', function(ev){
-        ev.preventDefault();
-        container.classList.remove('dragover');
-        var id = ev.dataTransfer.getData('text/plain');
-        if(id && !checked){ assignments[id] = binId; selected=null; draw(); }
-      });
       container.addEventListener('click', function(ev){
         if(checked) return;
-        if(ev.target !== container) return;
+        if(ev.target.closest('.tile')) return;
         if(selected){ assignments[selected] = binId; selected = null; draw(); }
       });
     }
 
     function draw(){
+      document.querySelectorAll('body > .tile').forEach(function(el){ el.remove(); });
       poolEl.innerHTML = '';
       tileOrder.filter(function(t){ return assignments[t.id]==='pool'; })
         .forEach(function(t){ poolEl.appendChild(makeTileEl(t)); });
@@ -929,7 +1022,7 @@
       '<section class="case-card">'+
         '<span class="eyebrow">Tundra Tale 4 · Don’t Miss the Moment</span>'+
         '<h2 class="headline">Help Lloyd time it right</h2>'+
-        '<p class="lede dim">Read the moment, then hit “Let’s Go” when you’re ready. Watch the needle sweep the track and click the button while it’s in the green “fitting moment” zone — too soon or too late and Lloyd misses it.</p>'+
+        '<p class="lede dim">Read the moment, then hit “Let’s Go” to start. Watch Lloyd sweep the track and click him while he’s in the green “fitting moment” zone — too soon or too late and he misses it.</p>'+
         '<div class="progress-row"><span class="progress-label" id="progLabel4"></span><span class="progress-label tnum" id="progScore4"></span></div>'+
         '<p class="lede" id="flavorText"></p>'+
         '<div class="track" id="track"><div class="needle" id="needle"></div></div>'+
@@ -969,6 +1062,8 @@
       resolved = true;
       cancelAnimationFrame(rafId);
       actionBtn.disabled = true;
+      needle.classList.remove('pickable');
+      needle.onclick = null;
       var right = elapsedFrac >= c.early && elapsedFrac <= c.late;
       var note = right ? c.hit_note : (elapsedFrac < c.early ? c.early_note : c.late_note);
       if(right){ roundScore += 20; addScore(20); }
@@ -991,6 +1086,9 @@
       buildTrack(c);
       needle.style.left = '0%';
       needle.style.visibility = 'hidden';
+      needle.classList.remove('pickable');
+      needle.onclick = null;
+      actionBtn.style.display = '';
       actionBtn.disabled = false;
       actionBtn.textContent = 'Let’s Go';
 
@@ -1008,11 +1106,14 @@
       actionBtn.onclick = function(e){
         thudify(e.currentTarget);
         needle.style.visibility = 'visible';
-        actionBtn.textContent = c.command;
+        needle.classList.add('pickable');
+        actionBtn.style.display = 'none';
         startTime = performance.now();
         rafId = requestAnimationFrame(tick);
-        actionBtn.onclick = function(e2){
+        needle.onclick = function(e2){
           thudify(e2.currentTarget);
+          needle.classList.remove('pickable');
+          needle.onclick = null;
           var now = performance.now();
           var frac = Math.min((now - startTime) / DURATION, 1);
           resolve(frac, c);
