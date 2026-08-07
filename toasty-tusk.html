@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chillwater Village: Fix Walter's Stand</title>
+<title>Vol. 4 — The Redesign Stand</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -22,7 +22,7 @@
   body{
     margin:0; min-height:100vh; overscroll-behavior-y: contain; font-family:var(--font-body); color:var(--plum);
     background:linear-gradient(180deg, var(--aurora) 0%, var(--twilight) 45%, var(--tundra) 100%);
-    padding:0 0 60px;
+    padding:0 0 120px;
   }
   #app{max-width:880px; margin:0 auto; padding:20px 14px 0; box-sizing:border-box;}
   h1,h2,h3{font-family:var(--font-display); font-weight:400; margin:0 0 6px;}
@@ -305,7 +305,7 @@
   .btn{min-height:44px;}
   .badge-row{flex-wrap:wrap;}
   @media (max-width:480px){
-    body{padding:14px 10px 50px;}
+    body{padding:14px 10px 100px;}
     .card{padding:16px;}
     .village-title{font-size:19px;}
     h1{font-size:20px;}
@@ -859,6 +859,7 @@ function enableDrag(piece, onCorrect, opts){
 
     let maxDist = 0;
     let hoverZone = null;
+    let scrollRAF = null, scrollSpeed = 0, lastClientY = startY;
     function clearHover(){
       if(hoverZone){
         hoverZone.classList.remove('preview');
@@ -868,11 +869,33 @@ function enableDrag(piece, onCorrect, opts){
         hoverZone = null;
       }
     }
+    function updateAutoScroll(clientY){
+      const edge = 70, vh = window.innerHeight;
+      if(clientY < edge){
+        scrollSpeed = -Math.round((edge - clientY) * 0.6);
+      } else if(clientY > vh - edge){
+        scrollSpeed = Math.round((clientY - (vh - edge)) * 0.6);
+      } else {
+        scrollSpeed = 0;
+      }
+      if(scrollSpeed !== 0 && !scrollRAF){
+        (function step(){
+          window.scrollBy(0, scrollSpeed);
+          piece.style.top = (lastClientY-dy)+'px';
+          scrollRAF = requestAnimationFrame(step);
+        })();
+      } else if(scrollSpeed === 0 && scrollRAF){
+        cancelAnimationFrame(scrollRAF);
+        scrollRAF = null;
+      }
+    }
     function move(ev){
       const d = Math.hypot(ev.clientX-startX, ev.clientY-startY);
       if(d>maxDist) maxDist=d;
+      lastClientY = ev.clientY;
       piece.style.left=(ev.clientX-dx)+'px';
       piece.style.top=(ev.clientY-dy)+'px';
+      updateAutoScroll(ev.clientY);
       if(opts.preview){
         const el = document.elementFromPoint(ev.clientX, ev.clientY);
         const zone = el ? el.closest('.dropzone') : null;
@@ -893,6 +916,7 @@ function enableDrag(piece, onCorrect, opts){
       piece.removeEventListener('pointerup',up);
       piece.classList.remove('dragging');
       clearHover();
+      if(scrollRAF){ cancelAnimationFrame(scrollRAF); scrollRAF = null; }
       piece.style.pointerEvents='';
       piece.style.position=''; piece.style.left=''; piece.style.top=''; piece.style.width=''; piece.style.zIndex='';
     }
@@ -903,6 +927,7 @@ function enableDrag(piece, onCorrect, opts){
       ph.remove();
     }
     function up(ev){
+      const el=document.elementFromPoint(ev.clientX, ev.clientY);
       reset();
 
       const finalDist = Math.max(maxDist, Math.hypot(ev.clientX-startX, ev.clientY-startY));
@@ -912,7 +937,6 @@ function enableDrag(piece, onCorrect, opts){
         if(opts.onTap) opts.onTap(piece);
         return;
       }
-      const el=document.elementFromPoint(ev.clientX, ev.clientY);
       let zone = el ? el.closest('.dropzone, .pin, .pin-zone') : null;
       let match = zone && zone.dataset.principle===piece.dataset.principle && !zone.classList.contains('filled') && !zone.classList.contains('solved');
       if(!match){
