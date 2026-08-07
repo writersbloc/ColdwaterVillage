@@ -1,4 +1,5 @@
 
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -178,10 +179,10 @@
   .dim{ color:var(--text-dim); }
 
   .character-hero{
-    background:var(--accent-violet); border-radius:16px; padding:20px; margin-bottom:1.2rem; color:#fff; overflow:auto;
+    background:var(--accent-violet); border-radius:4px; padding:20px; margin-bottom:1.2rem; color:#fff; overflow:auto;
   }
   .character-hero img{
-    height:150px; width:150px; object-fit:cover; border-radius:14px; border:4px solid #fff;
+    height:150px; width:150px; object-fit:cover; border-radius:4px; border:4px solid #fff;
     box-shadow:0 6px 16px rgba(0,0,0,.25); float:left; margin:0 18px 10px 0;
   }
   .character-hero h2{ margin:0 0 4px; font-family:'Baloo', ui-rounded, sans-serif; font-weight:400; font-size:1.4rem; color:#fff; }
@@ -196,7 +197,7 @@
     font-family:'Baloo', ui-rounded, sans-serif;
     font-weight:400; letter-spacing:.01em; font-size:.92rem;
     border:2px solid var(--accent-violet); background:transparent; color:var(--accent-violet);
-    padding:.75rem 1.5rem; border-radius:999px; cursor:pointer;
+    padding:.75rem 1.5rem; border-radius:3px; cursor:pointer;
     transition:transform .12s ease, background .12s ease, color .12s ease;
   }
   .btn:hover{ background:var(--accent-violet); color:#fff; }
@@ -219,7 +220,7 @@
   .def-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-top:1.4rem; }
   @media (max-width:640px){ .def-grid{ grid-template-columns:1fr; } }
   .def-card{
-    background:var(--surface-soft); border:1px solid var(--line); border-radius:14px;
+    background:var(--surface-soft); border:1px solid var(--line); border-radius:4px;
     padding:1.1rem 1rem;
   }
   .def-card .tag{
@@ -231,12 +232,12 @@
 
   .pool{
     display:flex; flex-wrap:wrap; gap:.6rem; margin:1.2rem 0 1.4rem;
-    padding:.9rem; border:2px dashed var(--line); border-radius:14px; min-height:3.4rem;
+    padding:.9rem; border:2px dashed var(--line); border-radius:4px; min-height:3.4rem;
   }
   .tile{
     font-size:.88rem; line-height:1.4; text-align:left;
     background:var(--surface); border:1.5px solid var(--text); color:var(--text);
-    padding:.6rem .8rem; border-radius:12px; cursor:grab; max-width:22rem;
+    padding:.6rem .8rem; border-radius:4px; cursor:grab; max-width:22rem;
   }
   .tile.selected{ border-color:var(--accent-amber); box-shadow:0 0 0 2px var(--accent-amber) inset; }
   .tile.correct{ border-color:var(--accent-ok); }
@@ -248,7 +249,7 @@
   .bin-grid.matrix{ grid-template-columns:repeat(2,1fr); }
   @media (max-width:420px){ .bin-grid.matrix{ grid-template-columns:1fr; } }
   .bin{
-    border:2px solid var(--line); border-radius:14px; padding:.7rem; min-height:8rem;
+    border:2px solid var(--line); border-radius:4px; padding:.7rem; min-height:8rem;
     background:var(--bg);
   }
   .bin.dragover{ border-color:var(--accent-amber); background:var(--surface-soft); }
@@ -271,7 +272,7 @@
   .option-list{ display:flex; flex-direction:column; gap:.7rem; margin-top:1.2rem; }
   .option-btn{
     display:flex; gap:.7rem; align-items:flex-start; text-align:left;
-    width:100%; padding:.85rem 1rem; border-radius:14px;
+    width:100%; padding:.85rem 1rem; border-radius:4px;
     border:1.5px solid var(--line); background:var(--surface); color:var(--text);
     font-size:.98rem; line-height:1.4; cursor:pointer;
   }
@@ -283,7 +284,7 @@
   .option-btn.incorrect{ border-color:var(--accent-red); background:color-mix(in srgb, var(--accent-red) 14%, var(--surface)); }
   .option-btn:disabled{ cursor:default; }
 
-  .feedback{ margin-top:1rem; padding:.9rem 1rem; border-radius:14px; border:2px solid var(--line); }
+  .feedback{ margin-top:1rem; padding:.9rem 1rem; border-radius:4px; border:2px solid var(--line); }
   .feedback.hit{ border-color:var(--accent-ok); }
   .feedback.miss{ border-color:var(--accent-red); }
   .stamp{
@@ -302,7 +303,7 @@
   .feedback p{ font-size:.92rem; line-height:1.5; }
 
   .track{
-    position:relative; height:2.6rem; border-radius:999px; overflow:hidden;
+    position:relative; height:2.6rem; border-radius:4px; overflow:hidden;
     border:2px solid var(--text); margin-top:1.3rem; display:flex;
   }
   .zone{ height:100%; }
@@ -363,7 +364,7 @@
   }
   var BITZER_SRC = 'https://raw.githubusercontent.com/writersbloc/ColdwaterVillage/main/Toasty%20Tusk/Lloyd%20B.png';
   function bitzerPhoto(size){
-    return '<img class="llama-mascot" src="'+BITZER_SRC+'" width="'+size+'" height="'+size+'" alt="Lloyd F. Bitzer" style="width:'+size+'px;height:'+size+'px;object-fit:cover;border-radius:10px;" />';
+    return '<img class="llama-mascot" src="'+BITZER_SRC+'" width="'+size+'" height="'+size+'" alt="Lloyd F. Bitzer" style="width:'+size+'px;height:'+size+'px;object-fit:cover;border-radius:4px;" />';
   }
 
   var STATE = {
