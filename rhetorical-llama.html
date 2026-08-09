@@ -1,5 +1,3 @@
-
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -408,8 +406,11 @@
 
   function thudify(btn){
     btn.classList.remove('thud');
-    void btn.offsetWidth;
-    btn.classList.add('thud');
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        btn.classList.add('thud');
+      });
+    });
   }
 
   function shuffled(arr){
@@ -564,7 +565,7 @@
       '<section class="case-card">'+
         '<h1 class="headline">Lloyd needs the right words.</h1>'+
         '<div class="character-hero">'+
-          '<img src="'+LLOYD_STAND_SRC+'" alt="Lloyd the Llama">'+
+          '<img src="'+LLOYD_STAND_SRC+'" alt="Lloyd the Llama" width="150" height="150">'+
           '<h2>Lloyd the Llama</h2>'+
           '<span class="character-tag">Chillwater Village’s Go-To Wordsmith</span>'+
           '<p>“Even I have to take time to think before I pick my words: what’s the urgency here? Who can act? And what’s already true that my words have to work around?”</p>'+
