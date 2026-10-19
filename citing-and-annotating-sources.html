@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>Citing and Annotating Sources</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: sticky step bar on top, five numbered step cards stacked below. */
+:root{
+  --grape:#8A3FBF; --violet:#9C4FD0; --rust:color-mix(in srgb,#E9615A 55%,#E0A63E); --amber:#E0A63E; --coral:#E9615A;
+  --bg:#F8F2EF; --surface:#FFFDFB; --sunk:#F2E7E6; --ink:#2A1A30; --muted:#6A5664; --line:#E5D3D3;
+  --accent:var(--grape); --accent-ink:#FFFFFF; --ok:#13866F; --ok-bg:#DDF5EF; --bad:#B7372F; --bad-bg:#FBE4E2;
+  --sky1:#7A34B0; --sky2:#B5478E; --sky3:#E9615A; --sky4:#E0A63E; --snow:#FFFFFF;
+  --display:"Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", Verdana, system-ui, sans-serif;
+  --mono:ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#1A1218; --surface:#261A24; --sunk:#1F151D; --ink:#F6ECEF; --muted:#C2ADB8; --line:#45303D;
+  --accent:#B77CE6; --accent-ink:#17121F; --ok:#4FD9BF; --ok-bg:#163A33; --bad:#FF8C84; --bad-bg:#3D1E1C;
+  --sky1:#3E1B5C; --sky2:#5E2350; --sky3:#7A2E2A; --sky4:#7A5220; --snow:#E9E4F5; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#1A1218; --surface:#261A24; --sunk:#1F151D; --ink:#F6ECEF; --muted:#C2ADB8; --line:#45303D;
+  --accent:#B77CE6; --accent-ink:#17121F; --ok:#4FD9BF; --ok-bg:#163A33; --bad:#FF8C84; --bad-bg:#3D1E1C;
+  --sky1:#3E1B5C; --sky2:#5E2350; --sky3:#7A2E2A; --sky4:#7A5220; --snow:#E9E4F5; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:1.0625rem;line-height:1.6}
+h1,h2,h3{font-family:var(--display);line-height:1.15;text-wrap:balance;margin:0}
+p{margin:0}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px;border-radius:6px}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+
+/* hero */
+.hero{background:linear-gradient(155deg,var(--sky1) 0%,var(--sky2) 42%,var(--sky3) 78%,var(--sky4) 100%);color:#fff;position:relative;overflow:hidden}
+.hero .wrap{padding-block:40px 92px;display:grid;gap:14px;position:relative;z-index:1}
+.eyebrow{font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;opacity:.9}
+.hero h1{font-size:clamp(2rem,6vw,3.2rem);font-weight:800}
+.hero p{max-width:60ch;font-size:1.05rem}
+.hero .meta{display:flex;flex-wrap:wrap;gap:8px}
+.pill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);padding:4px 12px;border-radius:999px;font-size:.88rem}
+.skyline{position:absolute;left:0;right:0;bottom:-1px;width:100%;height:84px;display:block}
+.skyline .hill{fill:var(--bg)}
+.skyline .house{fill:var(--snow);opacity:.22}
+canvas.snow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+
+/* station bar */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.stations{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--surface);border-bottom:1px solid var(--line)}
+.stations ol{list-style:none;margin:0;display:flex;gap:6px;overflow-x:auto;padding-block:10px;scrollbar-width:none}
+.stations a{display:flex;align-items:center;gap:8px;white-space:nowrap;text-decoration:none;color:var(--ink);font-size:.9rem;padding:6px 12px 6px 6px;border-radius:999px;border:1px solid var(--line);background:var(--bg)}
+.stations .n{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:.8rem;background:var(--sunk);color:var(--muted)}
+.stations a.done .n{background:var(--rust);color:#fff}
+.stations a.done .n::after{content:"✓"}
+.stations a.done .n span{display:none}
+
+main .wrap{display:grid;gap:28px;padding-block:28px 64px}
+.intro{display:grid;gap:10px}
+.intro .note{font-size:.92rem;color:var(--muted)}
+
+/* station */
+.station{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;scroll-margin-top:72px}
+.station-head{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;padding:18px 20px;border-bottom:1px solid var(--line);background:var(--sunk)}
+.host{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;flex:none}
+.host .num{font-family:var(--display);font-weight:800;font-size:1.6rem;color:var(--hostc)}
+.station-head .label{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.station-head h2{font-size:1.45rem;font-weight:800}
+.station-head .time{font-size:.88rem;color:var(--muted)}
+.station-body{padding:20px;display:grid;gap:18px}
+.speech{background:var(--bg);border-left:4px solid var(--hostc,var(--accent));padding:12px 16px;border-radius:0 10px 10px 0;max-width:68ch}
+.speech b{font-family:var(--display)}
+h3{font-size:1.1rem;font-weight:800}
+
+/* formula */
+.formula{font-family:var(--mono);font-size:.9rem;background:var(--sunk);border:1px dashed var(--line);border-radius:10px;padding:12px 14px;overflow-x:auto;line-height:1.7}
+.formula .tok{padding:1px 4px;border-radius:4px}
+.t-a{background:color-mix(in srgb,var(--violet) 22%,transparent)}
+.t-t{background:color-mix(in srgb,var(--rust) 26%,transparent)}
+.t-w{background:color-mix(in srgb,var(--grape) 30%,transparent)}
+.t-p{background:color-mix(in srgb,var(--amber) 28%,transparent)}
+.t-d{background:color-mix(in srgb,var(--coral) 24%,transparent)}
+
+/* tabs */
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{font:inherit;font-weight:700;padding:8px 16px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.tab .chk{margin-left:6px;color:var(--rust)}
+.tab[aria-selected="true"] .chk{color:inherit}
+
+/* fields */
+.fields{display:grid;gap:14px}
+.field{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:10px;align-items:start;padding:12px;border-radius:12px;background:var(--bg);border-left:5px solid var(--fc)}
+.field label{display:block;font-weight:700;font-size:.92rem;margin-bottom:4px}
+.field .hint{font-size:.82rem;color:var(--muted);margin-top:4px}
+input[type=text],textarea,select{width:100%;font:inherit;font-size:1rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+textarea{min-height:96px;resize:vertical;line-height:1.5}
+.where label{font-weight:400;color:var(--muted)}
+.toggle{display:flex;align-items:center;gap:8px;font-size:.88rem;margin-top:6px;cursor:pointer}
+.toggle input{width:18px;height:18px;accent-color:var(--accent)}
+@media (max-width:620px){.field{grid-template-columns:1fr}}
+
+/* output */
+.output{border:2px solid var(--accent);border-radius:12px;padding:14px 16px;background:var(--surface);display:grid;gap:10px}
+.output .cite{padding-left:2em;text-indent:-2em;font-family:"Times New Roman",Times,serif;font-size:1.08rem;line-height:1.7;overflow-wrap:anywhere}
+.output .cite.empty{color:var(--muted);font-family:var(--body);font-size:.95rem;text-indent:0;padding-left:0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;font-weight:700;font-size:.95rem;padding:9px 16px;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:hover{filter:brightness(1.08)}
+.status{font-size:.88rem;color:var(--muted)}
+.selfcheck{font-size:.88rem;display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:3px 10px;border-radius:999px;font-size:.82rem;font-weight:700;background:var(--sunk);color:var(--muted)}
+.chip.ok{background:var(--ok-bg);color:var(--ok)}
+
+/* quiz */
+.quiz{display:grid;gap:14px}
+.q{background:var(--bg);border-radius:12px;padding:14px 16px;display:grid;gap:10px}
+.q .scen{font-weight:700}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{font:inherit;font-size:.95rem;padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-align:left}
+.opt.right{background:var(--ok-bg);border-color:var(--ok);color:var(--ok);font-weight:700}
+.opt.wrong{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+.fb{font-size:.95rem}
+.fb.ok{color:var(--ok)} .fb.bad{color:var(--bad)}
+
+/* sorter */
+.sort{display:grid;gap:12px}
+.sort-item{display:grid;grid-template-columns:minmax(0,1fr) 200px;gap:12px;align-items:center;background:var(--bg);border-radius:12px;padding:14px 16px}
+.sort-item blockquote{margin:0;font-style:italic}
+.sort-item .fb{grid-column:1/-1}
+@media (max-width:620px){.sort-item{grid-template-columns:1fr}}
+
+.checks{display:grid;gap:8px}
+.checks label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.checks input{width:20px;height:20px;margin-top:2px;accent-color:var(--rust);flex:none}
+
+.split{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.split > *{min-width:0}
+.counter{font-size:.82rem;color:var(--muted);text-align:right}
+
+.anno-preview{font-family:"Times New Roman",Times,serif;font-size:1.05rem;line-height:1.75;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;overflow-wrap:anywhere}
+.anno-preview .cite{padding-left:2em;text-indent:-2em}
+.anno-preview .body{padding-left:2em;margin-top:2px}
+.anno-preview .ph{color:var(--muted);font-family:var(--body);font-size:.92rem}
+
+.field.one{grid-template-columns:1fr}
+.exfb{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.exfb:empty{display:none}
+.exfb li{padding:8px 12px;border-radius:10px;font-size:.95rem}
+.exfb li.ok{background:var(--ok-bg);color:var(--ok)}
+.exfb li.bad{background:var(--bad-bg);color:var(--bad)}
+.legend{display:flex;gap:8px;flex-wrap:wrap}
+mark{color:inherit;border-radius:4px;padding:1px 2px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.m-s{background:color-mix(in srgb,var(--violet) 24%,transparent)}
+.m-c{background:color-mix(in srgb,var(--amber) 30%,transparent)}
+.m-u{background:color-mix(in srgb,var(--rust) 26%,transparent)}
+.chip.m-s,.chip.m-c,.chip.m-u{color:var(--ink)}
+.inrow{display:flex;gap:6px;align-items:stretch}
+.inrow input{flex:1;min-width:0}
+.ital{font:italic 700 1.05rem Georgia,"Times New Roman",serif;width:42px;flex:none;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--muted);cursor:pointer}
+.ital[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.ital-demo{display:inline-grid;place-items:center;width:24px;height:22px;border:1px solid var(--line);border-radius:6px;font:italic 700 .95rem Georgia,serif;vertical-align:middle}
+.fmtnote{font-size:.95rem;max-width:68ch}
+.pager{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:16px 20px;border-top:1px solid var(--line);background:var(--sunk)}
+.pager .btn{margin-left:auto}
+.pager .btn.ghost{margin-left:0}
+.stations a[aria-current="step"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+.stations a[aria-current="step"] .n{background:var(--accent-ink);color:var(--accent)}
+.copybox{width:100%;min-height:160px;font-family:var(--mono);font-size:.85rem}
+footer{color:var(--muted);font-size:.85rem;text-align:center;padding-block:0 40px}
+
+@media (prefers-reduced-motion:reduce){canvas.snow{display:none}}
+</style>
+
+</head>
+<body>
+<header class="hero">
+  <canvas class="snow leaves" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <span class="eyebrow">ENG 111 · Creative Practice Investigation</span>
+    <h1>Citing and Annotating Your Sources</h1>
+    <p>Today you'll cite the three websites you found last week and work on turning them into full annotations for your annotated bibliography. Start with the example I provide, then do the same work on your own sources.</p>
+    <div class="meta">
+      <span class="pill">About 75 minutes</span>
+      <span class="pill">6 steps</span>
+      <span class="pill">Your work saves on this device</span>
+    </div>
+  </div>
+  <svg class="skyline" viewBox="0 0 1200 84" preserveAspectRatio="none" aria-hidden="true">
+        <path class="hill" d="M0 64 C200 40 360 78 600 58 C820 40 1000 76 1200 56 L1200 84 L0 84Z"/>
+  </svg>
+</header>
+
+<nav class="stations" aria-label="Steps">
+  <div class="wrap">
+    <ol>
+      <li><a href="#example" data-st="example"><span class="n"><span>1</span></span>Example</a></li>
+      <li><a href="#traps" data-st="traps"><span class="n"><span>2</span></span>Traps</a></li>
+      <li><a href="#cite" data-st="cite"><span class="n"><span>3</span></span>Cite yours</a></li>
+      <li><a href="#summary" data-st="summary"><span class="n"><span>4</span></span>Summarize</a></li>
+      <li><a href="#annotate" data-st="annotate"><span class="n"><span>5</span></span>Annotate</a></li>
+      <li><a href="#finish" data-st="finish"><span class="n"><span>6</span></span>Finish</a></li>
+    </ol>
+  </div>
+</nav>
+
+<main>
+<div class="wrap">
+
+  <section class="intro" aria-label="Before you start">
+    <h2 style="font-size:1.3rem">Before you start</h2>
+    <p>Open your three websites in other tabs. You'll go back and forth between them and this page a lot.</p>
+    <p class="note">Your answers save in this browser as you type. If you switch computers, they won't follow you, so finish on one device. When you're done, Step 6 copies your three entries for you to paste into today's exit ticket.</p>
+  </section>
+
+  <!-- 1 EXAMPLE -->
+  <section class="station" id="example" style="--hostc:var(--violet)">
+    <div class="station-head">
+      <div class="host" style="background:color-mix(in srgb,var(--violet) 20%,transparent)"><span class="num">1</span></div>
+      <div>
+        <div class="label">Step 1</div>
+        <h2>Practice on a shared example</h2>
+        <div class="time">About 15 minutes</div>
+      </div>
+    </div>
+    <div class="station-body">
+      <p class="speech">Before you work on your own sources, practice on one everyone can see: the website of watercolor artist Rachel Collins. Open <a href="https://www.rachelcollinsart.com/" target="_blank" rel="noopener">rachelcollinsart.com</a> in a new tab.</p>
+
+      <h3>A. Cite one page from the site</h3>
+      <p>On her site, click <b>Blog</b> and open the post "Classes are starting up!" Fill in each element from that post, then check your work.</p>
+      <div class="formula" aria-label="MLA website citation pattern">
+        <span class="tok t-a">Author Last, First.</span> <span class="tok t-t">"Title of Page."</span> <span class="tok t-w"><i>Name of Website</i>,</span> <span class="tok t-p">Publisher,</span> <span class="tok t-d">Day Month Year,</span> URL.
+      </div>
+      <p class="fmtnote">Type each element exactly as it should appear in your citation, punctuation and quotation marks included. Use the <span class="ital-demo">I</span> button to italicize any element that needs it.</p>
+      <div class="fields" id="ex-fields">
+        <div class="field one" style="--fc:var(--violet)"><div><label for="ex-author">Author</label><span class="inrow"><input type="text" id="ex-author" data-x="author"><button type="button" class="ital" data-xi="author" aria-pressed="false" aria-label="Italicize this element" title="Italicize">I</button></span></div></div>
+        <div class="field one" style="--fc:var(--rust)"><div><label for="ex-title">Title of the page</label><span class="inrow"><input type="text" id="ex-title" data-x="title"><button type="button" class="ital" data-xi="title" aria-pressed="false" aria-label="Italicize this element" title="Italicize">I</button></span></div></div>
+        <div class="field one" style="--fc:var(--grape)"><div><label for="ex-site">Name of website</label><span class="inrow"><input type="text" id="ex-site" data-x="site"><button type="button" class="ital" data-xi="site" aria-pressed="false" aria-label="Italicize this element" title="Italicize">I</button></span></div></div>
+        <div class="field one" style="--fc:var(--amber)"><div><label for="ex-pub">Publisher</label><span class="inrow"><input type="text" id="ex-pub" data-x="pub"><button type="button" class="ital" data-xi="pub" aria-pressed="false" aria-label="Italicize this element" title="Italicize">I</button></span><label class="toggle"><input type="checkbox" id="ex-samepub" data-x="samepub"> Same as the author or website name, or none listed</label></div></div>
+        <div class="field one" style="--fc:var(--coral)"><div><label for="ex-date">Date published</label><span class="inrow"><input type="text" id="ex-date" data-x="date"><button type="button" class="ital" data-xi="date" aria-pressed="false" aria-label="Italicize this element" title="Italicize">I</button></span><label class="toggle"><input type="checkbox" id="ex-nodate" data-x="nodate"> No publication date on the page</label></div></div>
+        <div class="field one" style="--fc:var(--muted)"><div><label for="ex-url">URL</label><span class="inrow"><input type="text" id="ex-url" data-x="url"><button type="button" class="ital" data-xi="url" aria-pressed="false" aria-label="Italicize this element" title="Italicize">I</button></span></div></div>
+      </div>
+      <div class="row"><button class="btn" type="button" id="ex-check">Check my citation</button><span class="status" id="ex-status" role="status"></span></div>
+      <ul class="exfb" id="ex-fb" aria-live="polite"></ul>
+      <div class="output" id="ex-model" hidden>
+        <div class="label" style="font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700">Model citation</div>
+        <p class="cite">Collins, Rachel. “Classes Are Starting Up!” <i>Rachel Collins Art</i>, 10 Apr. 2022, www.rachelcollinsart.com/post/classes-are-starting-up.</p>
+        <p style="font-size:.92rem;color:var(--muted)">MLA capitalizes the major words in a title, even when the site doesn't. The footer's © 2023 is the copyright for the whole site, so it never stands in for the post's date.</p>
+      </div>
+
+      <h3>B. Sort three summaries of the site</h3>
+      <p>A summary in an annotated bibliography tells your reader two things in two or three sentences of your own words. What the source <b>says</b>: its main claim, advice, or finding. What the source <b>does</b>: shows a technique, makes an argument, tells a story, compares options.</p>
+      <p>Here are three summaries of Rachel Collins's whole website. Label each one.</p>
+      <div class="sort" id="sorter"></div>
+      <div class="row"><button class="btn" type="button" id="check-sort">Check my labels</button><span class="status" id="sort-status" role="status"></span></div>
+
+      <h3>C. Read a model annotation</h3>
+      <p>Here's a full annotation for the site, with each part marked. Yours in Step 5 will follow the same pattern.</p>
+      <div class="anno-preview">
+        <p class="cite">Collins, Rachel. <i>Rachel Collins Art</i>, www.rachelcollinsart.com. Accessed <span class="today"></span>.</p>
+        <p class="body"><mark class="m-s">Virginia watercolorist and scientific illustrator Rachel Collins uses her site to show her paintings of plants, shells, bones, and landscapes and to advertise her classes. In her artist statement she argues that painting nature's forms closely can help viewers notice design in ordinary things.</mark> <mark class="m-c">Because this is her own site, the claims about her awards and exhibitions come from her. Her blog says she teaches at the Art League, which a reader could confirm by searching the Art League's own site.</mark> <mark class="m-u">For an investigation of watercolor, the site shows what one working painter's practice includes: the subjects she returns to, the teaching she does, and why she chose transparent watercolor.</mark></p>
+      </div>
+      <div class="legend"><span class="chip m-s">Summary</span><span class="chip m-c">Credibility</span><span class="chip m-u">Use</span></div>
+      <p style="font-size:.92rem;color:var(--muted)">This one cites the whole site instead of one page. A whole site has no page title, so its name goes in italics first. The homepage has no date, so the citation ends with the day you visited.</p>
+    </div>
+  </section>
+
+  <!-- 2 TRAPS -->
+  <section class="station" id="traps" style="--hostc:var(--amber)">
+    <div class="station-head">
+      <div class="host" style="background:color-mix(in srgb,var(--amber) 22%,transparent)"><span class="num">2</span></div>
+      <div>
+        <div class="label">Step 2</div>
+        <h2>Avoid the common traps</h2>
+        <div class="time">About 5 minutes</div>
+      </div>
+    </div>
+    <div class="station-body">
+      <p class="speech">Four places where citations often go wrong. Each one describes a <b>made-up website</b>, not the Rachel Collins site and not one of yours, so you only need what's written here to answer. Pick an answer for each. In Step 3, you'll check whether any of your own sites has the same problem.</p>
+      <div class="quiz" id="quiz"></div>
+    </div>
+  </section>
+
+  <!-- 1 CITE -->
+  <section class="station" id="cite" style="--hostc:var(--violet)">
+    <div class="station-head">
+      <div class="host" style="background:color-mix(in srgb,var(--violet) 20%,transparent)"><span class="num">3</span></div>
+      <div>
+        <div class="label">Step 3</div>
+        <h2>Cite your three sites</h2>
+        <div class="time">About 15 minutes</div>
+      </div>
+    </div>
+    <div class="station-body">
+      <p class="speech">Now do the same for your three sites. Fill in what each page gives you, and write down where you found each piece. If you can't say where you found it, you're guessing.</p>
+      <div class="formula" aria-label="MLA website citation pattern">
+        <span class="tok t-a">Author Last, First.</span> <span class="tok t-t">"Title of Page."</span> <span class="tok t-w"><i>Name of Website</i>,</span> <span class="tok t-p">Publisher,</span> <span class="tok t-d">Day Month Year,</span> URL.
+      </div>
+      <p class="fmtnote">Type each element exactly as it should appear in your citation, punctuation and quotation marks included. Use the <span class="ital-demo">I</span> button to italicize any element that needs it.</p>
+
+      <div class="tabs" role="tablist" aria-label="Your sites">
+        <button class="tab" role="tab" id="tab-0" aria-selected="true" aria-controls="sitepanel" data-i="0">Site 1<span class="chk" hidden>✓</span></button>
+        <button class="tab" role="tab" id="tab-1" aria-selected="false" aria-controls="sitepanel" data-i="1">Site 2<span class="chk" hidden>✓</span></button>
+        <button class="tab" role="tab" id="tab-2" aria-selected="false" aria-controls="sitepanel" data-i="2">Site 3<span class="chk" hidden>✓</span></button>
+      </div>
+
+      <div id="sitepanel" role="tabpanel" aria-labelledby="tab-0" class="fields">
+        <div class="field" style="--fc:var(--violet)">
+          <div>
+            <label for="f-author">Author</label>
+            <span class="inrow"><input type="text" id="f-author" data-k="author" placeholder="Lin, Maya."><button type="button" class="ital" data-ki="author" aria-pressed="false" aria-label="Italicize this element" title="Italicize">I</button></span>
+            <label class="toggle"><input type="checkbox" id="f-noauthor" data-k="noauthor"> No person named as the author</label>
+            <div class="hint">Last name, comma, first name, period.</div>
+          </div>
+          <div class="where"><label for="w-author">Where I found it</label><input type="text" id="w-author" data-w="author" placeholder="byline under the title"></div>
+        </div>
+        <div class="field" style="--fc:var(--rust)">
+          <div>
+            <label for="f-title">Title of the page</label>
+            <span class="inrow"><input type="text" id="f-title" data-k="title" placeholder="&quot;Throwing Your First Bowl on the Wheel.&quot;"><button type="button" class="ital" data-ki="title" aria-pressed="false" aria-label="Italicize this element" title="Italicize">I</button></span>
+            <div class="hint">The headline of this one page, not the whole site.</div>
+          </div>
+          <div class="where"><label for="w-title">Where I found it</label><input type="text" id="w-title" data-w="title" placeholder="headline at the top"></div>
+        </div>
+        <div class="field" style="--fc:var(--grape)">
+          <div>
+            <label for="f-site">Name of website</label>
+            <span class="inrow"><input type="text" id="f-site" data-k="site" placeholder="The Clay Studio Blog,"><button type="button" class="ital" data-ki="site" aria-pressed="false" aria-label="Italicize this element" title="Italicize">I</button></span>
+          </div>
+          <div class="where"><label for="w-site">Where I found it</label><input type="text" id="w-site" data-w="site" placeholder="logo in the header"></div>
+        </div>
+        <div class="field" style="--fc:var(--amber)">
+          <div>
+            <label for="f-pub">Publisher</label>
+            <span class="inrow"><input type="text" id="f-pub" data-k="pub" placeholder="Riverside Arts Collective,"><button type="button" class="ital" data-ki="pub" aria-pressed="false" aria-label="Italicize this element" title="Italicize">I</button></span>
+            <label class="toggle"><input type="checkbox" id="f-samepub" data-k="samepub"> Same as the website name, or none listed</label>
+          </div>
+          <div class="where"><label for="w-pub">Where I found it</label><input type="text" id="w-pub" data-w="pub" placeholder="copyright line in the footer"></div>
+        </div>
+        <div class="field" style="--fc:var(--coral)">
+          <div>
+            <label for="f-date">Date published</label>
+            <span class="inrow"><input type="text" id="f-date" data-k="date" placeholder="14 Mar. 2024,"><button type="button" class="ital" data-ki="date" aria-pressed="false" aria-label="Italicize this element" title="Italicize">I</button></span>
+            <label class="toggle"><input type="checkbox" id="f-nodate" data-k="nodate"> No publication date on the page</label>
+            <div class="hint">Day, abbreviated month, year. A footer copyright year doesn't count.</div>
+          </div>
+          <div class="where"><label for="w-date">Where I found it</label><input type="text" id="w-date" data-w="date" placeholder="under the author's name"></div>
+        </div>
+        <div class="field" style="--fc:var(--muted)">
+          <div>
+            <label for="f-url">URL</label>
+            <span class="inrow"><input type="text" id="f-url" data-k="url" placeholder="www.clayblog.org/first-bowl."><button type="button" class="ital" data-ki="url" aria-pressed="false" aria-label="Italicize this element" title="Italicize">I</button></span>
+            <div class="hint">Copy it from the address bar, then take off the https:// at the start.</div>
+          </div>
+          <div class="where"><label for="w-url">Where I found it</label><input type="text" id="w-url" data-w="url" placeholder="address bar" ></div>
+        </div>
+
+        <div class="output" aria-live="polite">
+          <div class="label" style="font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700">Your citation</div>
+          <p class="cite" id="cite-out"></p>
+          <ul class="exfb" id="fmt-fb" aria-live="polite"></ul>
+          <div class="row">
+            <button class="btn" type="button" id="fmt-check">Check citation</button>
+            <button class="btn ghost" type="button" id="copy-cite">Copy citation</button>
+            <button class="btn ghost" type="button" id="next-cite">Next citation →</button>
+            <span class="status" id="copy-cite-status" role="status"></span><span class="status" id="fmt-status" role="status"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 SUMMARY -->
+  <section class="station" id="summary" style="--hostc:var(--coral)">
+    <div class="station-head">
+      <div class="host" style="background:color-mix(in srgb,var(--coral) 20%,transparent)"><span class="num">4</span></div>
+      <div>
+        <div class="label">Step 4</div>
+        <h2>Summarize one of your sites</h2>
+        <div class="time">About 15 minutes</div>
+      </div>
+    </div>
+    <div class="station-body">
+      <p class="speech">Now summarize one of your own sites, the way the third summary in Step 1 did for Rachel Collins.</p>
+      <h3>Write your own</h3>
+      <div style="display:grid;gap:14px">
+        <div style="display:grid;gap:8px">
+          <label for="sum-site" style="font-weight:700">Which site are you summarizing?</label>
+          <select id="sum-site"></select>
+          <p class="hint" style="font-size:.88rem;color:var(--muted)">Read or watch it all the way through first. Then close the tab and write without looking back.</p>
+          <label for="sum-draft" style="font-weight:700">First draft (2–3 sentences)</label>
+          <textarea id="sum-draft" placeholder="Who made it, what it says, what it does."></textarea>
+          <div class="counter" id="sum-draft-count"></div>
+          <div class="row"><button class="btn" type="button" id="check-draft" disabled>Check my draft</button><span class="status" id="check-draft-hint">Write your first draft, then check it.</span></div>
+        </div>
+        <div id="sum-check-panel" style="display:grid;gap:8px;align-content:start" hidden>
+          <p style="font-weight:700">Check your draft. Tick only what's true right now.</p>
+          <div class="checks" id="sum-checks">
+            <label><input type="checkbox" data-c="0"> It names who made the source, or the site behind it.</label>
+            <label><input type="checkbox" data-c="1"> It states the main claim or advice, not only the topic.</label>
+            <label><input type="checkbox" data-c="2"> It says what the source does (shows, argues, tells, compares).</label>
+            <label><input type="checkbox" data-c="3"> It's in my words, with a short quote at most.</label>
+          </div>
+          <p class="status" id="sum-check-status" role="status"></p>
+        </div>
+      </div>
+      <div id="sum-rev-panel" style="display:grid;gap:8px" hidden>
+        <label for="sum-rev" style="font-weight:700">Revised summary</label>
+        <p style="font-size:.92rem;color:var(--muted)">Revise until all four boxes are honest checks. This version carries into Step 5.</p>
+        <div class="row"><button class="btn ghost" type="button" id="copy-draft">Start from my first draft</button></div>
+        <textarea id="sum-rev"></textarea>
+        <div class="counter" id="sum-rev-count"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 ANNOTATE -->
+  <section class="station" id="annotate" style="--hostc:var(--grape)">
+    <div class="station-head">
+      <div class="host" style="background:color-mix(in srgb,var(--grape) 18%,transparent)"><span class="num">5</span></div>
+      <div>
+        <div class="label">Step 5</div>
+        <h2>Annotate all three sites</h2>
+        <div class="time">About 30 minutes</div>
+      </div>
+    </div>
+    <div class="station-body">
+      <p class="speech">Write a full annotation for each of your three sites. Start with the one you summarized in Step 4. Like the model in Step 1, each annotation has three parts and runs five to seven sentences. The preview at the bottom puts it together the way it'll look in your bibliography.</p>
+      <div class="tabs" role="tablist" aria-label="Annotations">
+        <button class="tab atab" role="tab" id="atab-0" aria-selected="true" aria-controls="anpanel" data-a="0">Site 1<span class="chk" hidden>✓</span></button>
+        <button class="tab atab" role="tab" id="atab-1" aria-selected="false" aria-controls="anpanel" data-a="1">Site 2<span class="chk" hidden>✓</span></button>
+        <button class="tab atab" role="tab" id="atab-2" aria-selected="false" aria-controls="anpanel" data-a="2">Site 3<span class="chk" hidden>✓</span></button>
+      </div>
+      <div id="anpanel" role="tabpanel" aria-labelledby="atab-0" style="display:grid;gap:18px">
+      <div style="display:grid;gap:8px">
+        <label for="an-sum" style="font-weight:700">1. Summary <span style="font-weight:400;color:var(--muted)">(2–3 sentences)</span></label>
+        <p style="font-size:.92rem;color:var(--muted)" id="an-sum-hint">Filled in from your revised summary. Edit here if you want.</p>
+        <textarea id="an-sum"></textarea>
+      </div>
+      <div style="display:grid;gap:8px">
+        <label for="an-cred" style="font-weight:700">2. Credibility <span style="font-weight:400;color:var(--muted)">(1–2 sentences)</span></label>
+        <p style="font-size:.92rem;color:var(--muted)">Leave the page. Search the author or site name in a new tab. Who's behind it: a working artist, a company selling supplies, a hobbyist, a school? What does that tell you about how far to trust it?</p>
+        <textarea id="an-cred"></textarea>
+      </div>
+      <div style="display:grid;gap:8px">
+        <label for="an-use" style="font-weight:700">3. Use <span style="font-weight:400;color:var(--muted)">(1–2 sentences)</span></label>
+        <p style="font-size:.92rem;color:var(--muted)">What does this source give your Creative Practice Investigation? A technique, a history, a common beginner mistake, a voice from inside the practice?</p>
+        <textarea id="an-use"></textarea>
+      </div>
+      <div style="display:grid;gap:8px">
+        <h3>Preview</h3>
+        <div class="anno-preview" id="an-preview" aria-live="polite"></div>
+        <div class="counter" id="an-count"></div>
+      </div>
+      <div class="row"><button class="btn ghost" type="button" id="next-anno">Next annotation →</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 FINISH -->
+  <section class="station" id="finish" style="--hostc:var(--amber)">
+    <div class="station-head">
+      <div class="host" style="background:color-mix(in srgb,var(--coral) 20%,transparent)"><span class="num">6</span></div>
+      <div>
+        <div class="label">Step 6</div>
+        <h2>Finish up</h2>
+        <div class="time">About 5 minutes, then homework</div>
+      </div>
+    </div>
+    <div class="station-body">
+      <p>Below are your three website entries, each citation with its annotation, in alphabetical order. Copy them and paste them into today's exit ticket. Pasting drops italics, so that's expected in the exit ticket.</p>
+      <textarea class="copybox" id="all-out" readonly aria-label="Your three website entries, ready to copy"></textarea>
+      <div class="row"><button class="btn" type="button" id="copy-all">Copy my entries</button><span class="status" id="copy-all-status" role="status"></span></div>
+
+      <h3>Before Wednesday</h3>
+      <div class="checks" id="hw">
+        <label><input type="checkbox" data-h="0"> Add these three website entries to the document with your YouTube and library sources.</label>
+        <label><input type="checkbox" data-h="1"> Put all of your entries in alphabetical order by the first word of each citation, and italicize the website names again.</label>
+        <label><input type="checkbox" data-h="2"> Bring the document to class on Wednesday.</label>
+      </div>
+      <div class="row"><button class="btn ghost" type="button" id="reset">Clear my work on this device</button><span class="status" id="reset-status" role="status"></span></div>
+    </div>
+  </section>
+
+</div>
+</main>
+<footer>ENG 111 · College Composition I</footer>
+
+<script>
+(function(){
+  var KEY='cw-records-hall-v1';
+  var blankSite=function(){return {author:'',noauthor:false,title:'',site:'',pub:'',samepub:false,date:'',nodate:false,url:'',where:{author:'',title:'',site:'',pub:'',date:'',url:''}}};
+  var S={ex:{author:'',title:'',site:'',pub:'',samepub:false,date:'',nodate:false,url:''},exOk:false,cur:0,sites:[blankSite(),blankSite(),blankSite()],quiz:{},sort:{},sumSite:0,draft:'',checks:[false,false,false,false],rev:'',anSum:'',anSumTouched:false,cred:'',use:'',anno:null,anCur:0,hw:[false,false,false]};
+  try{var saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved&&saved.sites){S=Object.assign(S,saved)}}catch(e){}
+  if(!(S.cur>=0&&S.cur<3))S.cur=0;if(!(S.anCur>=0&&S.anCur<3))S.anCur=0;
+  var armed=false,resetArmed=false;
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+  function $(s,r){return (r||document).querySelector(s)}
+  function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+  function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+  var MON=['Jan.','Feb.','Mar.','Apr.','May','June','July','Aug.','Sept.','Oct.','Nov.','Dec.'];
+  function today(){var d=new Date();return d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear()}
+  function flip(n){n=n.trim().replace(/\.$/,'');if(!n)return '';if(n.indexOf(',')>-1)return n;var p=n.split(/\s+/);if(p.length<2)return n;var last=p.pop();return last+', '+p.join(' ')}
+  function cleanUrl(u){return u.trim().replace(/^https?:\/\//i,'').replace(/\/$/,'')}
+  function endP(t){t=t.trim();return /[.?!]$/.test(t)?t:t+'.'}
+  function quoteTitle(t){t=t.trim();if(!t)return '';return /[?!]$/.test(t)?'“'+t+'”':'“'+t+'.”'}
+
+  var NAMES={author:'Author',title:'Title',site:'Website',pub:'Publisher',date:'Date',url:'URL'};
+  function activeKeys(s){return ['author','title','site','pub','date','url'].filter(function(k){if(k==='author'&&s.noauthor)return false;if(k==='pub'&&s.samepub)return false;if(k==='date'&&s.nodate)return false;return s[k].trim()})}
+  function fieldHTML(v,it){v=v.trim();if(!it)return esc(v);var m=v.match(/^([\s\S]*?)([.,]?)$/);return '<i>'+esc(m[1])+'</i>'+esc(m[2])}
+  function citeHTML(s){var a=activeKeys(s).map(function(k){return fieldHTML(s[k],(s.ital||{})[k])});if(s.nodate)a.push('Accessed '+today()+'.');return a.join(' ')}
+  function citeText(s){var a=activeKeys(s).map(function(k){return s[k].trim()});if(s.nodate)a.push('Accessed '+today()+'.');return a.join(' ')}
+  function fmtIssues(k,v,it){
+    v=String(v||'').trim();var r=[];if(!v)return r;
+    if(k==='author'){if(v.indexOf(',')<0)r.push('Put a comma between the last name and the first.');if(!/\.$/.test(v))r.push('End the author with a period.');if(it)r.push('The author is not italicized.')}
+    if(k==='title'){if(!/^["“]/.test(v)||!/["”]$/.test(v))r.push('Put the page title in quotation marks.');else if(!/[.?!]["”]$/.test(v))r.push('Put a period inside the closing quotation mark.');if(it)r.push('A page title goes in quotation marks, not italics.')}
+    if(k==='site'){if(!it)r.push('Italicize the website name. It is the larger container that holds the page.');if(!/,$/.test(v))r.push('End the website name with a comma.')}
+    if(k==='pub'||k==='date'){var nm=k==='pub'?'publisher':'date';if(it)r.push('The '+nm+' is not italicized.');if(!/,$/.test(v))r.push('End the '+nm+' with a comma.')}
+    if(k==='url'){if(/^https?:\/\//i.test(v))r.push('Take off the https:// at the start.');if(!/\.$/.test(v))r.push('End the URL with a period.');if(it)r.push('The URL is not italicized.')}
+    return r;
+  }
+  function hasCite(s){return !!(s.title.trim()||s.site.trim()||s.url.trim())}
+  function siteLabel(i){var s=S.sites[i];var t=s.title.trim()||s.site.trim();return 'Site '+(i+1)+(t?': '+t:'')}
+
+  var ELEMENTS=[['author','Author'],['title','Title'],['site','Website'],['pub','Publisher'],['date','Date'],['url','URL']];
+  function siteDone(s){
+    return ELEMENTS.every(function(e){var k=e[0];
+      if(k==='author'&&s.noauthor)return true;
+      if(k==='pub'&&s.samepub)return true;
+      if(k==='date'&&s.nodate)return true;
+      return s[k].trim()&&s.where[k].trim()&&!fmtIssues(k,s[k],(s.ital||{})[k]).length;});
+  }
+
+  /* --- Example --- */
+  function norm(t){return String(t||'').toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim()}
+  $$('#ex-fields [data-x]').forEach(function(el){
+    if(el.type==='checkbox')el.checked=!!S.ex[el.dataset.x];else el.value=S.ex[el.dataset.x]||'';
+    el.addEventListener(el.type==='checkbox'?'change':'input',function(){S.ex[el.dataset.x]=el.type==='checkbox'?el.checked:el.value;save()});
+  });
+  S.ex.ital=S.ex.ital||{};
+  $$('#ex-fields [data-xi]').forEach(function(b){b.setAttribute('aria-pressed',S.ex.ital[b.dataset.xi]?'true':'false');b.addEventListener('click',function(){S.ex.ital[b.dataset.xi]=!S.ex.ital[b.dataset.xi];b.setAttribute('aria-pressed',S.ex.ital[b.dataset.xi]?'true':'false');save()})});
+  function exCheck(){
+    var e=S.ex,r=[];
+    var names=['rachel collins','collins rachel','rachel brunstetter collins','collins rachel brunstetter'];
+    r.push(names.indexOf(norm(e.author))>-1?[1,'Author: right. The post credits Rachel Collins.']:[0,'Author: look at the byline on the post. Who wrote it? Write it Last, First.']);
+    r.push(norm(e.title)==='classes are starting up'?[1,'Title: right. Use the post’s own headline.']:[0,'Title: use the headline of this one post, not the name of the site.']);
+    r.push(norm(e.site)==='rachel collins art'?[1,'Website: right.']:[0,'Website: check the name at the top of every page of the site.']);
+    if(e.samepub||!e.pub.trim())r.push([1,'Publisher: right to leave it out. The site belongs to the author, so there’s nothing new to add.']);
+    else r.push([0,'Publisher: Rachel Collins is already the author and the site carries her name, so leave the publisher out.']);
+    var d=norm(e.date);
+    if(e.nodate)r.push([0,'Date: this post does have a date. Look near the byline.']);
+    else if(/2023/.test(d))r.push([0,'Date: 2023 is the copyright year in the footer. It covers the whole site. Look for the post’s own date near the byline.']);
+    else if(/\b10\b/.test(d)&&/apr/.test(d)&&/2022/.test(d))r.push(/^10 Apr\. 2022,?$/.test(e.date.trim())?[1,'Date: right.']:[1,'Date: right date. In MLA, write it day month year with the month abbreviated: 10 Apr. 2022.']);
+    else r.push([0,'Date: look near the byline at the top of the post.']);
+    r.push(norm(e.url).indexOf('rachelcollinsart com post classes are starting up')>-1?[1,'URL: right. Leave off the https:// in the citation.']:[0,'URL: copy the address of the post itself from the address bar, not the homepage.']);
+    ['author','title','site','pub','date','url'].forEach(function(k,i){if(!r[i][0])return;if(k==='pub'&&(e.samepub||!e.pub.trim()))return;var is=fmtIssues(k,e[k],e.ital[k]);if(is.length)r[i]=[0,NAMES[k]+': right content. '+is.join(' ')]});
+    $('#ex-fb').innerHTML=r.map(function(x){return '<li class="'+(x[0]?'ok':'bad')+'">'+esc(x[1])+'</li>'}).join('');
+    var n=r.filter(function(x){return x[0]}).length;
+    $('#ex-status').textContent=n+' of 6 right.'+(n<6?' Fix the red ones and check again.':'');
+    S.exOk=n===6;$('#ex-model').hidden=false;progress();save();
+  }
+  $('#ex-check').addEventListener('click',exCheck);
+  $$('.today').forEach(function(el){el.textContent=today()});
+  /* --- Station 1 --- */
+  function loadSite(){
+    var s=S.sites[S.cur];
+    $$('#sitepanel [data-k]').forEach(function(el){if(el.type==='checkbox')el.checked=!!s[el.dataset.k];else el.value=s[el.dataset.k]||''});
+    $$('#sitepanel [data-w]').forEach(function(el){el.value=s.where[el.dataset.w]||''});
+    s.ital=s.ital||{};$$('#sitepanel [data-ki]').forEach(function(b){b.setAttribute('aria-pressed',s.ital[b.dataset.ki]?'true':'false')});
+    $('#fmt-fb').innerHTML='';$('#fmt-status').textContent='';
+    $$('.tab:not(.atab)').forEach(function(t,i){t.setAttribute('aria-selected',i===S.cur?'true':'false');t.tabIndex=i===S.cur?0:-1});
+    $('#sitepanel').setAttribute('aria-labelledby','tab-'+S.cur);
+    disableBits();renderCite();
+  }
+  function disableBits(){
+    var s=S.sites[S.cur];
+    $('#f-author').disabled=s.noauthor;$('#w-author').disabled=s.noauthor;
+    $('#f-pub').disabled=s.samepub;$('#w-pub').disabled=s.samepub;
+    $('#f-date').disabled=s.nodate;$('#w-date').disabled=s.nodate;
+  }
+  function renderCite(){
+    var s=S.sites[S.cur],out=$('#cite-out');
+    if(hasCite(s)){out.className='cite';out.innerHTML=citeHTML(s)}else{out.className='cite empty';out.textContent='Start filling in the fields and your citation builds here.'}
+    $$('.tab:not(.atab)').forEach(function(t,i){t.querySelector('.chk').hidden=!siteDone(S.sites[i])});
+    progress();
+  }
+  $$('#sitepanel [data-k]').forEach(function(el){el.addEventListener(el.type==='checkbox'?'change':'input',function(){var s=S.sites[S.cur];s[el.dataset.k]=el.type==='checkbox'?el.checked:el.value;disableBits();renderCite();renderSumSelect();renderPreview();renderAll();save()})});
+  $$('#sitepanel [data-ki]').forEach(function(b){b.addEventListener('click',function(){var s=S.sites[S.cur];s.ital=s.ital||{};s.ital[b.dataset.ki]=!s.ital[b.dataset.ki];b.setAttribute('aria-pressed',s.ital[b.dataset.ki]?'true':'false');renderCite();renderPreview();save()})});
+  $('#fmt-check').addEventListener('click',function(){var s=S.sites[S.cur];var keys=activeKeys(s);if(!keys.length){$('#fmt-status').textContent='Fill in some elements first.';return}var r=keys.map(function(k){var is=fmtIssues(k,s[k],(s.ital||{})[k]);return is.length?[0,NAMES[k]+': '+is.join(' ')]:[1,NAMES[k]+': punctuation and italics look right.']});$('#fmt-fb').innerHTML=r.map(function(x){return '<li class="'+(x[0]?'ok':'bad')+'">'+esc(x[1])+'</li>'}).join('');var n=r.filter(function(x){return x[0]}).length;$('#fmt-status').textContent=n+' of '+r.length+' elements formatted right.';renderCite()});
+  $$('#sitepanel [data-w]').forEach(function(el){el.addEventListener('input',function(){S.sites[S.cur].where[el.dataset.w]=el.value;renderCite();save()})});
+  $$('.tab:not(.atab)').forEach(function(t,i){
+    t.addEventListener('click',function(){S.cur=i;loadSite();save()});
+    t.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='ArrowLeft'){var n=(i+(e.key==='ArrowRight'?1:2))%3;S.cur=n;loadSite();$('#tab-'+n).focus();save()}});
+    t.addEventListener('click',setNextLabel);t.addEventListener('keydown',setNextLabel);
+  });
+
+  function copyText(txt,statusEl,fallbackEl){
+    var done=function(){statusEl.textContent='Copied.'};
+    var fail=function(){if(fallbackEl){fallbackEl.focus();fallbackEl.select()}statusEl.textContent=fallbackEl?'Selected. Press Ctrl+C (or Cmd+C) to copy.':'Select the text and copy it by hand.'};
+    try{navigator.clipboard.writeText(txt).then(done,fail)}catch(e){fail()}
+  }
+  $('#copy-cite').addEventListener('click',function(){var s=S.sites[S.cur];if(!hasCite(s)){$('#copy-cite-status').textContent='Nothing to copy yet.';return}copyText(citeText(s),$('#copy-cite-status'))});
+
+  /* --- Station 2 --- */
+  var QUIZ=[
+    {s:'The page has no byline anywhere. The footer says "© 2025 Glaze Guild."',q:'What goes first in the citation?',o:['Anonymous.','Glaze Guild.','The title of the page'],a:2,e:'With no person named, start with the title. Glaze Guild belongs in the publisher spot if it isn’t also the website’s name.'},
+    {s:'The website is called Stitch Notes. The footer says "Published by Stitch Notes."',q:'What goes in the publisher spot?',o:['Stitch Notes','Nothing. Leave it out.','Unknown'],a:1,e:'When the publisher and the website share a name, list it once, as the website.'},
+    {s:'The only date on the whole page is "© 2026" at the very bottom.',q:'What do you do with the date?',o:['Use 2026 as the date','Leave it out and add an accessed date at the end','Write n.d.'],a:1,e:'A footer copyright year covers the whole site, not this page. Leave the date out and end with "Accessed" plus the day you looked at it.'},
+    {s:'The address bar shows https://www.example.com/hand-planes-101/',q:'How does the URL appear in your citation?',o:['https://www.example.com/hand-planes-101/','www.example.com/hand-planes-101','example.com'],a:1,e:'MLA drops the https:// and keeps the rest of the address so a reader can find this exact page.'}
+  ];
+  function renderQuiz(){
+    $('#quiz').innerHTML=QUIZ.map(function(q,i){
+      var pick=S.quiz[i];
+      return '<div class="q" role="group" aria-labelledby="qs'+i+'"><p class="scen" id="qs'+i+'"><span class="chip" style="margin-right:8px">Made-up site '+(i+1)+'</span>'+esc(q.s)+'</p><p>'+esc(q.q)+'</p><div class="opts">'+
+        q.o.map(function(o,j){var cls=pick===undefined?'':(j===q.a&&pick===j?' right':(pick===j?' wrong':''));return '<button type="button" class="opt'+cls+'" data-q="'+i+'" data-o="'+j+'" aria-pressed="'+(pick===j)+'">'+esc(o)+'</button>'}).join('')+
+        '</div><p class="fb '+(pick===undefined?'':(pick===q.a?'ok':'bad'))+'" aria-live="polite">'+(pick===undefined?'':(pick===q.a?'Right. ':'Not quite. ')+esc(q.e))+'</p></div>';
+    }).join('');
+    $$('#quiz .opt').forEach(function(b){b.addEventListener('click',function(){S.quiz[b.dataset.q]=+b.dataset.o;renderQuiz();progress();save()})});
+  }
+
+  /* --- Station 3 --- */
+  var SORT=[
+    {t:'This website is about watercolor painting.',a:'topic',e:'Topic only. It names the subject but not what the site says or does.'},
+    {t:'The site has an About page, an Artwork page, a Classes and Workshops page, a Resources page, and a Blog.',a:'list',e:'Just a list. It tells you what’s on the menu, not what the site says.'},
+    {t:'Virginia watercolorist and scientific illustrator Rachel Collins uses her site to show her paintings of plants, shells, bones, and landscapes and to advertise her classes. In her artist statement she argues that painting nature’s forms closely can help viewers notice design in ordinary things.',a:'both',e:'Says and does. Who made it, what she argues, and what the site actually offers.'}
+  ];
+
+  var LABELS={'':'Choose a label','topic':'Topic only','list':'Just a list','both':'Says and does'};
+  var sortChecked=false;
+  function renderSorter(){
+    $('#sorter').innerHTML=SORT.map(function(s,i){
+      var v=S.sort[i]||'';var fb='';
+      if(sortChecked&&v){fb='<p class="fb '+(v===s.a?'ok':'bad')+'">'+(v===s.a?esc(s.e):'Look again. Does it name a claim, or only the subject or the pages?')+'</p>'}
+      return '<div class="sort-item"><blockquote>'+esc(s.t)+'</blockquote><select aria-label="Label for summary '+(i+1)+'" data-s="'+i+'">'+
+        Object.keys(LABELS).map(function(k){return '<option value="'+k+'"'+(k===v?' selected':'')+'>'+LABELS[k]+'</option>'}).join('')+'</select>'+fb+'</div>';
+    }).join('');
+    $$('#sorter select').forEach(function(sel){sel.addEventListener('change',function(){S.sort[sel.dataset.s]=sel.value;sortChecked=false;renderSorter();$('#sort-status').textContent='';save()})});
+  }
+  $('#check-sort').addEventListener('click',function(){
+    var n=SORT.filter(function(s,i){return S.sort[i]}).length;
+    if(n<3){$('#sort-status').textContent='Label all three first.';return}
+    sortChecked=true;renderSorter();
+    var right=SORT.filter(function(s,i){return S.sort[i]===s.a}).length;
+    $('#sort-status').textContent=right+' of 3 match. Aim for the third kind when you summarize your own site in Step 4.';
+    progress();
+  });
+
+  function renderSumSelect(){
+    var sel=$('#sum-site');sel.innerHTML=[0,1,2].map(function(i){return '<option value="'+i+'"'+(i===S.sumSite?' selected':'')+'>'+esc(siteLabel(i))+'</option>'}).join('');
+  }
+  $('#sum-site').addEventListener('change',function(e){S.sumSite=+e.target.value;syncPrefill();loadAnno();renderPreview();renderAll();save()});
+  function sentences(t){t=t.trim();if(!t)return 0;var m=t.match(/[^.!?]+[.!?]+(\s|$)/g);return m?m.length+(/[.!?]\s*$/.test(t)?0:1):1}
+  function words(t){t=t.trim();return t?t.split(/\s+/).length:0}
+  function countLine(t){var w=words(t),s=sentences(t);return w?w+' words · '+s+' sentence'+(s===1?'':'s'):''}
+  function draftGate(){var has=!!S.draft.trim();$('#check-draft').disabled=!has||!!S.checkShown;$('#check-draft-hint').textContent=S.checkShown?'':(has?'':'Write your first draft, then check it.');$('#sum-check-panel').hidden=!S.checkShown;$('#sum-rev-panel').hidden=!S.checkShown;$('#check-draft').hidden=!!S.checkShown}
+  $('#check-draft').addEventListener('click',function(){S.checkShown=true;draftGate();save();var f=$('#sum-checks input');if(f)f.focus()});
+  $('#sum-draft').addEventListener('input',function(e){S.draft=e.target.value;draftGate();$('#sum-draft-count').textContent=countLine(S.draft);progress();renderAll();save()});
+  $('#sum-rev').addEventListener('input',function(e){S.rev=e.target.value;$('#sum-rev-count').textContent=countLine(S.rev);syncPrefill();loadAnno();renderPreview();progress();renderAll();save()});
+  $('#copy-draft').addEventListener('click',function(){if(S.rev.trim()&&!armed){armed=true;this.textContent='Replace my revision? Click again';return}armed=false;this.textContent='Start from my first draft';S.rev=S.draft;$('#sum-rev').value=S.rev;$('#sum-rev').dispatchEvent(new Event('input'))});
+  $$('#sum-checks input').forEach(function(c){c.addEventListener('change',function(){S.checks[+c.dataset.c]=c.checked;var n=S.checks.filter(Boolean).length;$('#sum-check-status').textContent=n===4?'All four. Now tighten it in the revision box.':(4-n)+' still open. Those are what your revision should fix.';save()})});
+
+  /* --- Annotations, one per site --- */
+  if(!S.anno){S.anno=[0,1,2].map(function(){return {sum:'',cred:'',use:'',touched:false}});var o=S.anno[S.sumSite];o.sum=S.anSum||'';o.cred=S.cred||'';o.use=S.use||'';o.touched=!!S.anSumTouched}
+  S.anCur=S.anCur||0;
+  function syncPrefill(){S.anno.forEach(function(a,i){if(!a.touched)a.sum=i===S.sumSite?S.rev:''})}
+  function annoBody(i){var a=S.anno[i];return [a.sum,a.cred,a.use].map(function(t){return (t||'').trim()}).filter(Boolean).join(' ')}
+  function annoDone(i){var a=S.anno[i];return !!((a.sum||'').trim()&&(a.cred||'').trim()&&(a.use||'').trim())}
+  function loadAnno(){
+    var a=S.anno[S.anCur];
+    $('#an-sum').value=a.sum;$('#an-cred').value=a.cred;$('#an-use').value=a.use;
+    $('#an-sum-hint').textContent=S.anCur===S.sumSite?'Filled in from your revised summary in Step 4. Edit here if you want.':'Write two or three sentences that say what this source says and what it does, like the third summary in Step 1.';
+    $$('.atab').forEach(function(t,i){t.setAttribute('aria-selected',i===S.anCur?'true':'false');t.tabIndex=i===S.anCur?0:-1;var lb=S.sites[i].title.trim()||S.sites[i].site.trim();t.firstChild.nodeValue='Site '+(i+1);t.title=lb;t.querySelector('.chk').hidden=!annoDone(i)});
+    $('#anpanel').setAttribute('aria-labelledby','atab-'+S.anCur);
+    $('#next-anno').textContent=S.anCur<2?'Next annotation: Site '+(S.anCur+2)+' →':'Done annotating: go to Finish →';
+    renderPreview();
+  }
+  $$('.atab').forEach(function(t,i){
+    t.addEventListener('click',function(){S.anCur=i;loadAnno();save()});
+    t.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='ArrowLeft'){S.anCur=(i+(e.key==='ArrowRight'?1:2))%3;loadAnno();$('#atab-'+S.anCur).focus();save()}});
+  });
+  $('#next-anno').addEventListener('click',function(){
+    if(S.anCur<2){S.anCur++;loadAnno();save();var top=$('#annotate .tabs').getBoundingClientRect().top+window.pageYOffset-$('.stations').offsetHeight-12;window.scrollTo({top:Math.max(0,top)});$('#atab-'+S.anCur).focus({preventScroll:true})}
+    else showPage('finish',true);
+  });
+  $('#an-sum').addEventListener('input',function(e){var a=S.anno[S.anCur];a.sum=e.target.value;a.touched=true;renderPreview();renderAll();save()});
+  $('#an-cred').addEventListener('input',function(e){S.anno[S.anCur].cred=e.target.value;renderPreview();renderAll();save()});
+  $('#an-use').addEventListener('input',function(e){S.anno[S.anCur].use=e.target.value;renderPreview();renderAll();save()});
+  function renderPreview(){
+    if(!S.anno)return;
+    var i=S.anCur,s=S.sites[i];var body=annoBody(i);
+    var c=hasCite(s)?'<p class="cite">'+citeHTML(s)+'</p>':'<p class="ph">Your citation for Site '+(i+1)+' shows here once you fill it in at Step 3.</p>';
+    var b=body?'<p class="body">'+esc(body)+'</p>':'<p class="ph" style="padding-left:2em">Your summary, credibility, and use sentences show here as one paragraph.</p>';
+    $('#an-preview').innerHTML=c+b;
+    var n=sentences(body);$('#an-count').textContent=body?n+' sentences'+(n<5||n>7?' · aim for 5 to 7':' · on target'):'';
+    $$('.atab').forEach(function(t,k){t.querySelector('.chk').hidden=!annoDone(k)});
+    progress();
+  }
+
+  /* --- Station 5 --- */
+  function renderAll(){
+    var cites=S.sites.map(function(s,i){return {i:i,t:hasCite(s)?citeText(s):''}}).filter(function(c){return c.t});
+    cites.sort(function(a,b){return a.t.replace(/^\W+/,'').localeCompare(b.t.replace(/^\W+/,''))});
+    var out=[];
+    if(cites.length)cites.forEach(function(c){out.push(c.t);var b=annoBody(c.i);out.push(b?'    '+b:'    (Annotation not written yet)');out.push('')});else out.push('(No citations yet)');
+    $('#all-out').value=out.join('\n');
+  }
+  $('#copy-all').addEventListener('click',function(){copyText($('#all-out').value,$('#copy-all-status'),$('#all-out'))});
+  $$('#hw input').forEach(function(c){c.addEventListener('change',function(){S.hw[+c.dataset.h]=c.checked;progress();save()})});
+  $('#reset').addEventListener('click',function(){
+    if(!resetArmed){resetArmed=true;this.textContent='This erases everything. Click again to clear';return}
+    try{localStorage.removeItem(KEY)}catch(e){}location.reload();
+  });
+
+  function progress(){
+    var st={
+      example:!!(S.exOk&&SORT.every(function(q,i){return S.sort[i]===q.a})),
+      cite:S.sites.every(siteDone),
+      traps:QUIZ.every(function(q,i){return S.quiz[i]===q.a}),
+      summary:!!S.rev.trim(),
+      annotate:[0,1,2].every(annoDone),
+      finish:S.hw.every(Boolean)
+    };
+    Object.keys(st).forEach(function(k){var a=$('.stations a[data-st="'+k+'"]');a.classList.toggle('done',st[k]);a.setAttribute('aria-label',a.textContent.replace(/^\d/,'')+(st[k]?', done':''))});
+  }
+
+  /* init */
+  loadSite();renderQuiz();renderSorter();renderSumSelect();
+  $('#sum-draft').value=S.draft;$('#sum-rev').value=S.rev;
+  $('#sum-draft-count').textContent=countLine(S.draft);$('#sum-rev-count').textContent=countLine(S.rev);
+  $$('#sum-checks input').forEach(function(c){c.checked=!!S.checks[+c.dataset.c]});
+  draftGate();
+  $$('#hw input').forEach(function(c){c.checked=!!S.hw[+c.dataset.h]});
+  syncPrefill();loadAnno();
+  renderPreview();renderAll();progress();
+
+  function setNextLabel(){$('#next-cite').textContent=S.cur<2?'Next citation: Site '+(S.cur+2)+' →':'Done citing: go to Summarize →'}
+  $('#next-cite').addEventListener('click',function(){
+    if(S.cur<2){S.cur++;loadSite();setNextLabel();save();var tb=$('#tab-'+S.cur);var top=$('.tabs').getBoundingClientRect().top+window.pageYOffset-$('.stations').offsetHeight-12;window.scrollTo({top:Math.max(0,top)});tb.focus({preventScroll:true})}
+    else showPage('summary',true);
+  });
+  setNextLabel();
+
+  /* pages */
+  var PAGES=['example','traps','cite','summary','annotate','finish'];
+  var NAVTXT={};$$('.stations a').forEach(function(a){NAVTXT[a.dataset.st]=a.textContent.replace(/^\d+/,'').trim()});
+  PAGES.forEach(function(id,i){
+    var bar=document.createElement('div');bar.className='pager';
+    if(i>0){var b=document.createElement('button');b.type='button';b.className='btn ghost';b.textContent='← Back: '+NAVTXT[PAGES[i-1]];b.addEventListener('click',function(){showPage(PAGES[i-1],true)});bar.appendChild(b)}
+    if(i<PAGES.length-1){var n=document.createElement('button');n.type='button';n.className='btn';n.textContent='Next: '+NAVTXT[PAGES[i+1]]+' →';n.addEventListener('click',function(){showPage(PAGES[i+1],true)});bar.appendChild(n)}
+    $('#'+id).appendChild(bar);
+  });
+  function showPage(id,scroll){
+    if(PAGES.indexOf(id)<0)id='example';
+    PAGES.forEach(function(p){$('#'+p).hidden=p!==id});
+    $('.intro').hidden=id!=='example';
+    $$('.stations a').forEach(function(a){if(a.dataset.st===id)a.setAttribute('aria-current','step');else a.removeAttribute('aria-current')});
+    var cur=$('.stations a[data-st="'+id+'"]');if(cur&&cur.scrollIntoView)try{cur.scrollIntoView({block:'nearest',inline:'nearest'})}catch(e){}
+    S.page=id;save();
+    if(scroll){var top=$('main').getBoundingClientRect().top+window.pageYOffset-$('.stations').offsetHeight;window.scrollTo({top:Math.max(0,top),behavior:'auto'});var h=$('#'+id+' h2');if(h){h.tabIndex=-1;h.focus({preventScroll:true})}}
+  }
+  $$('.stations a').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();showPage(a.dataset.st,true)})});
+  window.addEventListener('hashchange',function(){var h=location.hash.slice(1);if(PAGES.indexOf(h)>-1)showPage(h,true)});
+  var startHash=location.hash.slice(1);
+  showPage(PAGES.indexOf(startHash)>-1?startHash:(S.page||'example'),false);
+
+  /* snow */
+  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    var cv=$('canvas.snow'),ctx=cv.getContext('2d'),flakes=[],W,H;
+    function size(){W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight}
+    size();window.addEventListener('resize',size);
+    var LC=['#E0A63E','#E9615A','#F2C26B','#C9502F','#B77CE6'];
+    for(var i=0;i<26;i++)flakes.push({x:Math.random(),y:Math.random(),r:5+Math.random()*6,s:.25+Math.random()*.4,d:Math.random()*6,a:Math.random()*6.283,va:(Math.random()-.5)*.03,c:LC[i%LC.length]});
+    (function tick(){ctx.clearRect(0,0,W,H);
+      flakes.forEach(function(f){f.y+=f.s/H*3;f.d+=.012;f.a+=f.va;if(f.y>1.05){f.y=-.05;f.x=Math.random()}var x=f.x*W+Math.sin(f.d)*18;
+        ctx.save();ctx.translate(x,f.y*H);ctx.rotate(f.a);ctx.globalAlpha=.8;ctx.fillStyle=f.c;ctx.beginPath();ctx.moveTo(0,-f.r);ctx.quadraticCurveTo(f.r*.75,0,0,f.r);ctx.quadraticCurveTo(-f.r*.75,0,0,-f.r);ctx.fill();
+        ctx.globalAlpha=.5;ctx.strokeStyle='rgba(60,20,30,.6)';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(0,-f.r);ctx.lineTo(0,f.r*1.2);ctx.stroke();ctx.restore()});
+      requestAnimationFrame(tick)})();
+  }
+})();
+</script>
+
+</body>
+</html>
