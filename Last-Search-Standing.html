@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Last Search Standing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a game table. Main stage on the left walks through the four calls; your team's cards sit on the right; the log runs underneath like a call slip. */
+:root{
+  --bg:#F5F3F8; --surface:#FFFFFF; --sunk:#ECE8F2; --ink:#1D1630; --muted:#5E566D; --line:#D6CEE2;
+  --practice:#8A3FBF; --practice-soft:#F1E7F9; --angle:#0F7F72; --angle-soft:#E1F3F0;
+  --mod:#B83A33; --mod-soft:#FBE8E6; --on-accent:#FFFFFF;
+  --warn:#8A5300; --warn-soft:#FFF2D9; --good:#1E7A3C; --good-soft:#E3F5E8;
+  --display:'Bricolage Grotesque','Avenir Next','Segoe UI',sans-serif;
+  --body:'Atkinson Hyperlegible','Verdana','Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#14111B; --surface:#1F1A29; --sunk:#2A2436; --ink:#EEE9F6; --muted:#A99FBC; --line:#3A3349;
+  --practice:#C391F2; --practice-soft:#2D2240; --angle:#4FD0BE; --angle-soft:#14302C;
+  --mod:#F2857C; --mod-soft:#3A1E22; --on-accent:#14111B;
+  --warn:#F2BE62; --warn-soft:#3A2D12; --good:#72D492; --good-soft:#163222; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#14111B; --surface:#1F1A29; --sunk:#2A2436; --ink:#EEE9F6; --muted:#A99FBC; --line:#3A3349;
+  --practice:#C391F2; --practice-soft:#2D2240; --angle:#4FD0BE; --angle-soft:#14302C;
+  --mod:#F2857C; --mod-soft:#3A1E22; --on-accent:#14111B;
+  --warn:#F2BE62; --warn-soft:#3A2D12; --good:#72D492; --good-soft:#163222; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+h1,h2,h3{font-family:var(--display);font-weight:800;line-height:1.1;margin:0;text-wrap:balance}
+h2{font-size:1.5rem} h3{font-size:1.1rem}
+p{margin:0}
+a{color:var(--practice)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--practice);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:2px solid var(--ink);
+  display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;padding-block:14px}
+.brand{font-family:var(--display);font-weight:800;font-size:1.35rem;letter-spacing:-.01em}
+.track{display:flex;gap:4px;align-items:center}
+.track span{font:600 .78rem var(--mono);width:34px;height:28px;display:grid;place-items:center;border:1.5px solid var(--line);border-radius:6px;color:var(--muted)}
+.track span.done{background:var(--sunk);color:var(--ink);border-color:var(--sunk)}
+.track span.now{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.track span.dead{text-decoration:line-through}
+.ghost{background:none;border:1.5px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.9rem}
+.ghost:hover{border-color:var(--ink)}
+
+/* layout */
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;margin-top:24px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.stage{border:2px solid var(--ink)}
+.eyebrow{font:700 .75rem var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.call{display:flex;gap:6px;flex-wrap:wrap}
+.call span{font:700 .78rem var(--body);letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:999px;background:var(--sunk);color:var(--muted)}
+.call span.on{background:var(--ink);color:var(--bg)}
+.muted{color:var(--muted)}
+.small{font-size:.88rem}
+.side{display:flex;flex-direction:column;gap:16px;min-width:0}
+
+/* buttons */
+.btn{appearance:none;border:2px solid var(--ink);background:var(--ink);color:var(--bg);border-radius:8px;padding:10px 18px;font-weight:700;cursor:pointer;min-height:44px}
+.btn:hover{filter:brightness(1.15)}
+.btn.alt{background:transparent;color:var(--ink)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+
+/* cards */
+.cards{display:flex;flex-wrap:wrap;gap:10px}
+.card{width:132px;min-height:150px;border-radius:9px;border:1.5px solid var(--line);background:var(--surface);display:flex;flex-direction:column;overflow:hidden}
+.card .hd{font:700 .68rem var(--body);letter-spacing:.14em;padding:6px 8px;display:flex;justify-content:space-between;color:var(--on-accent)}
+.card .wd{flex:1;display:grid;place-items:center;text-align:center;padding:10px 8px;font-family:var(--display);font-weight:800;font-size:1.2rem;line-height:1.1;overflow-wrap:anywhere}
+.card .ft{font-size:.72rem;color:var(--muted);text-align:center;padding:0 8px 8px}
+.card.p .hd{background:var(--practice)} .card.p{border-color:var(--practice)}
+.card.a .hd{background:var(--angle)} .card.a{border-color:var(--angle)}
+.card.m .hd{background:var(--mod)} .card.m{border-color:var(--mod)}
+.card.flip{animation:flip .5s ease-out}
+@keyframes flip{from{transform:rotateY(90deg) scale(.9);opacity:.2}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.card.flip{animation:none}}
+.back{width:132px;height:150px;border-radius:9px;display:grid;place-items:center;color:var(--on-accent);font:800 2.4rem var(--display)}
+.back.a{background:var(--angle)} .back.p{background:var(--practice)}
+
+/* mod hand */
+.hand{display:flex;flex-direction:column;gap:10px}
+.mod{border:1.5px solid var(--mod);border-radius:9px;overflow:hidden;background:var(--surface)}
+.mod .hd{background:var(--mod);color:var(--on-accent);font:700 .68rem var(--body);letter-spacing:.14em;padding:6px 10px;display:flex;justify-content:space-between}
+.mod .bd{padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.mod .nm{font:800 1.1rem var(--display)}
+.mod .tx{font-size:.88rem}
+.mod.sel{box-shadow:0 0 0 3px var(--mod)}
+.mod.held .hd{background:var(--muted)}
+
+/* search */
+.query{font-family:var(--mono);font-size:1rem;width:100%;min-height:76px;padding:12px;border:2px solid var(--ink);border-radius:8px;background:var(--sunk);resize:vertical}
+label{font-weight:700;font-size:.92rem;display:flex;flex-direction:column;gap:5px}
+input[type=text],input[type=number],select,textarea.note{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);min-height:44px}
+textarea.note{min-height:70px;resize:vertical;font-weight:400}
+.fields{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px}
+@media (max-width:560px){.fields{grid-template-columns:minmax(0,1fr)}}
+.checks{display:flex;flex-wrap:wrap;gap:6px}
+.chk{font:600 .82rem var(--mono);padding:4px 9px;border-radius:6px;border:1.5px solid var(--line)}
+.chk.ok{border-color:var(--good);color:var(--good);background:var(--good-soft)}
+.chk.no{border-color:var(--mod);color:var(--mod);background:var(--mod-soft)}
+.filters{display:flex;flex-wrap:wrap;gap:6px}
+.filter{font:700 .82rem var(--body);padding:5px 10px;border-radius:999px;background:var(--mod-soft);color:var(--mod);border:1.5px solid var(--mod)}
+.note-box{border-radius:8px;padding:10px 12px;font-size:.92rem}
+.note-box.warn{background:var(--warn-soft);color:var(--warn)}
+.note-box.err{background:var(--mod-soft);color:var(--mod);font-weight:700}
+.note-box.good{background:var(--good-soft);color:var(--good)}
+.note-box.info{background:var(--sunk)}
+.steps{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:4px}
+
+/* events */
+.feed{display:flex;flex-direction:column;gap:8px}
+.ev{border-left:4px solid var(--line);padding:6px 10px;background:var(--sunk);border-radius:0 6px 6px 0;font-size:.93rem}
+.ev.hit{border-color:var(--mod)} .ev.mine{border-color:var(--practice)} .ev.out{border-color:var(--ink);font-weight:700}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;border:1.5px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font:700 .72rem var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--sunk)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+td.str{font-family:var(--mono);font-size:.84rem;min-width:220px}
+tr:last-child td{border-bottom:0}
+.outc{color:var(--mod);font-weight:700}
+.you td{background:var(--practice-soft)}
+
+.big{font:800 3rem var(--display);font-variant-numeric:tabular-nums;line-height:1}
+.hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:28px;margin-top:28px;align-items:start}
+@media (max-width:860px){.hero{grid-template-columns:minmax(0,1fr)}}
+.hero h1{font-size:clamp(2.4rem,6vw,4.2rem);letter-spacing:-.02em}
+.hero .lede{font-size:1.12rem;max-width:58ch}
+.four{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:640px){.four{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.four div{border:1.5px solid var(--ink);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:4px;font-size:.9rem}
+.four b{font-family:var(--display);font-size:1.05rem}
+.copyfall{width:100%;min-height:160px;font-family:var(--mono);font-size:.82rem}
+</style>
+<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">Last Search Standing</div>
+    <div class="track" id="track" aria-label="Rounds"></div>
+    <button class="ghost" id="newgame" type="button">New game</button>
+  </header>
+  <main id="app"></main>
+</div>
+
+<script>
+(function(){
+'use strict';
+var PRIMO='https://vcc-nvc.primo.exlibrisgroup.com/discovery/search?tab=Everything&search_scope=MyInst_and_CI&vid=01VCC_NVC:NVCC&lang=en&mode=advanced';
+var KEY='lss-solo-v1';
+var PRACTICES=['zines','quilting','beatboxing','improv','bonsai','tattooing','Minecraft','sourdough','knitting','graffiti','slam poetry','cosplay','woodworking','ceramics','embroidery','skateboarding','origami','photography'];
+var ANGLES=['history','community','gender','mental health','technology','economics','education','identity','ritual','failure','social media','disability','aging','race','environment','children','motivation','tourism'];
+var MODS={
+ or:{name:'OR',t:'self',x:'Add a synonym to one of your words with OR.'},
+ quote:{name:'Quotation Marks',t:'rival',x:'Two of a rival’s words become one exact phrase.'},
+ peer:{name:'Peer Reviewed',t:'rival',x:'Rival turns on Peer-reviewed Journals for the rest of the game.',f:'Peer-reviewed Journals'},
+ last5:{name:'Last 5 Years',t:'rival',x:'Rival limits results to the last five years for the rest of the game.',f:'Last 5 years'},
+ books:{name:'Books Only',t:'rival',x:'Rival limits results to books and ebooks.',f:'Books only'},
+ trunc:{name:'Truncation',t:'self',x:'Cut one word to its root and add *. knit* finds knitting, knitters, and knits.'},
+ synonym:{name:'Synonym Swap',t:'self',x:'Replace one Angle word with a synonym.'},
+ subject:{name:'Subject Terms',t:'self',x:'Open a result in Primo, copy one of its subjects, and swap it in for an Angle word.'},
+ not:{name:'NOT',t:'rival',x:'Rival must exclude a word with NOT.'},
+ double:{name:'Double Down',t:'rival',x:'Rival draws a second Angle card this round.'},
+ articles:{name:'Articles Only',t:'rival',x:'Rival limits results to journal articles.',f:'Articles only'},
+ fulltext:{name:'Full Text',t:'rival',x:'Rival limits results to items available online.',f:'Available Online'},
+ shield:{name:'Shield',t:'react',x:'Hold this card. Cancel one Mod played on you.'},
+ bounce:{name:'Bounce',t:'react',x:'Hold this card. Send one Mod played on you back to the team that played it.'},
+ steal:{name:'Steal',t:'rival',x:'Trade your newest Angle card for a rival’s newest.'},
+ scavenger:{name:'Scavenger',t:'self',x:'Swap the Angle card you drew this round: look at the top three and keep one.'}
+};
+var MOD_DECK=['or','or','quote','peer','peer','last5','books','trunc','synonym','subject','not','double','articles','fulltext','shield','bounce','steal','scavenger'];
+var ATTACKS=['peer','last5','books','articles','fulltext','quote','not','double','steal','peer','double'];
+var RIVALS=['The Footnotes','Team Ibid','The Stacks'];
+var NOT_WORDS=['children','education','health','women','business','art','culture','media','music','history'];
+var CALLS=['Draw','Mods','Search','Counts'];
+
+var S=null;
+var flipId=null;
+
+/* ---------- utilities ---------- */
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function rand(a,b){return a+Math.random()*(b-a);}
+function randInt(a,b){return Math.floor(rand(a,b+1));}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+var uidN=0; function uid(){uidN++;return 'x'+Date.now().toString(36)+uidN;}
+function fmt(n){return n==null?'':Number(n).toLocaleString('en-US');}
+function stripQ(w){return String(w).replace(/^"|"$/g,'');}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function load(){try{var v=localStorage.getItem(KEY);return v?JSON.parse(v):null;}catch(e){return null;}}
+
+/* ---------- game setup ---------- */
+function newGame(practice){
+  var others=shuffle(PRACTICES.filter(function(p){return p.toLowerCase()!==practice.toLowerCase();})).slice(0,3);
+  S={v:1,phase:'play',round:1,step:'search',practice:practice,
+    terms:[{id:uid(),kind:'practice',words:[practice]}],nots:[],filters:[],
+    angleDeck:shuffle(ANGLES.slice()),modDeck:shuffle(MOD_DECK.map(function(t){return {id:uid(),type:t};})),modDiscard:[],hand:[],
+    drew:null,modStage:'choose',sel:null,pending:[],ev:[],form:{count:'',title:'',why:'',str:null},err:'',
+    log:[],res:null,resUsed:false,outcome:null,reflect:{q1:'',q2:'',q3:''},bridge:{p:'',a1:'',a2:''},
+    rivals:RIVALS.map(function(n,i){return {name:n,practice:others[i],angles:[],count:null,alive:true,resUsed:false,back:false,mult:1,hist:[]};})};
+  drawMods(3);
+}
+function drawMods(n){
+  for(var i=0;i<n;i++){
+    if(!S.modDeck.length){S.modDeck=shuffle(S.modDiscard);S.modDiscard=[];}
+    if(!S.modDeck.length)break;
+    S.hand.push(S.modDeck.shift());
+  }
+}
+function drawAngle(){
+  var used=S.terms.map(function(t){return stripQ(t.words[0]).toLowerCase();});
+  for(var k=0;k<S.angleDeck.length;k++){
+    var w=S.angleDeck[k];
+    if(used.indexOf(w.toLowerCase())<0){S.angleDeck.splice(k,1);return w;}
+  }
+  return pick(ANGLES);
+}
+function angleTerms(){return S.terms.filter(function(t){return t.kind==='angle';});}
+function newestAngle(){var a=angleTerms();return a.length?a[a.length-1]:null;}
+function aliveRivals(){return S.rivals.filter(function(r){return r.alive;});}
+
+/* ---------- search string ---------- */
+function termPart(t){
+  var ws=t.words.map(function(w){return (t.words.length>1&&w.indexOf(' ')>=0&&w.charAt(0)!=='"')?'"'+w+'"':w;});
+  return ws.length>1?'('+ws.join(' OR ')+')':ws[0];
+}
+function buildString(){
+  var s=S.terms.map(termPart).join(' AND ');
+  S.nots.forEach(function(n){s+=' NOT '+n;});
+  return s;
+}
+function currentString(){return S.form.str==null?buildString():S.form.str;}
+function termLabel(t){return t.words.join(' OR ');}
+function termOk(t,str){
+  var low=str.toLowerCase();
+  var toks=low.match(/[a-z]{3,}\*/g)||[];
+  return t.words.some(function(w){
+    var wl=w.toLowerCase();
+    if(wl.slice(-1)==='*'||wl.charAt(0)==='"')return low.indexOf(wl)>=0;
+    if(low.indexOf(wl)>=0)return true;
+    if(wl.indexOf(' ')<0)return toks.some(function(tk){return wl.indexOf(tk.slice(0,-1))===0;});
+    return wl.split(/\s+/).every(function(p){return low.indexOf(p)>=0;});
+  });
+}
+function notOk(word,str){
+  var re=/(^|\s)NOT\s+"?([^\s"()]+)/g,m;
+  while((m=re.exec(str))){if(m[2].toLowerCase()===word.toLowerCase())return true;}
+  return false;
+}
+function checkString(str){
+  var items=S.terms.map(function(t){return {label:termLabel(t),ok:termOk(t,str)};});
+  S.nots.forEach(function(n){items.push({label:'NOT '+n,ok:notOk(n,str)});});
+  return items;
+}
+function lowerOps(str){return /(^|\s)(and|or|not)(\s|$)/.test(str);}
+function logString(str){return str+(S.filters.length?' ['+S.filters.join(', ').toLowerCase()+']':'');}
+
+/* ---------- filters and attacks ---------- */
+function addFilter(f){
+  if(f==='Books only')S.filters=S.filters.filter(function(x){return x!=='Articles only';});
+  if(f==='Articles only')S.filters=S.filters.filter(function(x){return x!=='Books only';});
+  if(S.filters.indexOf(f)<0)S.filters.push(f);
+}
+function quoteTarget(){
+  for(var i=0;i<S.terms.length;i++){var w=S.terms[i].words[0];if(w.indexOf(' ')>=0&&w.charAt(0)!=='"')return {type:'multi',t:S.terms[i]};}
+  var p=S.terms.filter(function(t){return t.kind==='practice';})[0];
+  var a=newestAngle();
+  if(p&&a)return {type:'merge',p:p,a:a};
+  return null;
+}
+function applyQuote(){
+  var q=quoteTarget(); if(!q)return 'nothing to quote';
+  if(q.type==='multi'){q.t.words=['"'+stripQ(q.t.words[0])+'"'];return 'your words '+q.t.words[0]+' are now one exact phrase';}
+  var phrase='"'+stripQ(q.p.words[0])+' '+stripQ(q.a.words[0])+'"';
+  S.terms=S.terms.filter(function(t){return t!==q.p&&t!==q.a;});
+  S.terms.unshift({id:uid(),kind:'phrase',hasPractice:true,words:[phrase]});
+  return 'your Practice word and newest Angle are now one exact phrase: '+phrase;
+}
+function notWord(){
+  var str=buildString().toLowerCase();
+  var opts=NOT_WORDS.filter(function(w){return str.indexOf(w)<0&&S.nots.indexOf(w)<0;});
+  return opts.length?pick(opts):null;
+}
+function attackOk(type){
+  var d=MODS[type];
+  if(d.f)return S.filters.indexOf(d.f)<0;
+  if(type==='quote')return !!quoteTarget();
+  if(type==='steal')return !!newestAngle();
+  if(type==='not')return !!notWord();
+  return true;
+}
+function rivalMoves(){
+  if(S.round<2)return;
+  var cap=S.round>=4?2:1,n=0;
+  shuffle(aliveRivals().slice()).forEach(function(r){
+    if(n>=cap||Math.random()>0.42)return;
+    var opts=ATTACKS.filter(attackOk); if(!opts.length)return;
+    var type=pick(opts);
+    S.pending.push({from:r.name,type:type,word:type==='not'?notWord():null});
+    n++;
+  });
+  if(!S.pending.length)S.ev.push({k:'',t:'No rival played a Mod on you this round.'});
+}
+function applyAttack(p){
+  var d=MODS[p.type],msg='';
+  if(d.f){addFilter(d.f);msg='turn on '+d.f+' in Primo and keep it on';}
+  else if(p.type==='quote'){msg=applyQuote();}
+  else if(p.type==='not'){S.nots.push(p.word);msg='add NOT '+p.word+' to your search';}
+  else if(p.type==='double'){var w=drawAngle();S.terms.push({id:uid(),kind:'angle',words:[w]});flipId=S.terms[S.terms.length-1].id;msg='you drew a second Angle card: '+w;}
+  else if(p.type==='steal'){
+    var r=rivalByName(p.from),a=newestAngle(),theirs=r.angles.length?r.angles[r.angles.length-1]:pick(ANGLES);
+    var mine=stripQ(a.words[0]); a.words=[theirs];
+    if(r.angles.length)r.angles[r.angles.length-1]=mine;else r.angles.push(mine);
+    msg='they took '+mine+' and gave you '+theirs;
+  }
+  S.form.str=null;
+  S.ev.push({k:'hit',t:p.from+' played '+d.name+' on you: '+msg+'.'});
+}
+function rivalByName(n){return S.rivals.filter(function(r){return r.name===n;})[0];}
+function hitRival(r,type){
+  var d=MODS[type];
+  if(Math.random()<0.15){S.ev.push({k:'mine',t:r.name+' blocked your '+d.name+' with a Shield.'});return;}
+  var f=type==='double'?rand(0.15,0.45):d.f?rand(0.25,0.6):type==='steal'?rand(0.4,1.1):rand(0.3,0.7);
+  r.mult*=f;
+  if(type==='steal'){
+    var a=newestAngle();
+    if(a){var mine=stripQ(a.words[0]);var theirs=r.angles.length?r.angles[r.angles.length-1]:pick(ANGLES);a.words=[theirs];if(r.angles.length)r.angles[r.angles.length-1]=mine;else r.angles.push(mine);S.form.str=null;
+      S.ev.push({k:'mine',t:'You played Steal on '+r.name+'. You gave them '+mine+' and took '+theirs+'.'});return;}
+  }
+  S.ev.push({k:'mine',t:'You played '+d.name+' on '+r.name+'.'});
+}
+
+/* ---------- rival simulation (simulated counts) ---------- */
+function simulateRivals(){
+  S.rivals.forEach(function(r){
+    if(!r.alive){r.hist.push(null);return;}
+    if(S.round===1)r.count=randInt(900,6500);
+    else{
+      if(r.back){r.back=false;}
+      r.angles.push(pick(ANGLES));
+      r.count=Math.floor(r.count*rand(0.1,0.5)*r.mult);
+      if(S.round>=3&&Math.random()<0.1)r.count=0;
+    }
+    r.mult=1;
+    if(r.count<1){
+      r.count=0;r.hist.push(0);
+      if(!r.resUsed&&Math.random()<0.5){r.resUsed=true;r.back=true;r.count=randInt(4,40);S.ev.push({k:'out',t:r.name+' hit 0 and used their resurrection. They are back next round.'});}
+      else{r.alive=false;S.ev.push({k:'out',t:r.name+' hit 0. They are out.'});}
+    }else r.hist.push(r.count);
+  });
+}
+
+/* ---------- actions ---------- */
+function startRound(n){
+  S.round=n;S.step='draw';S.modStage='choose';S.sel=null;S.pending=[];S.ev=[];S.drew=null;S.err='';
+  S.form={count:'',title:'',why:'',str:null};
+}
+var A={
+  drawPractice:function(){S={phase:'intro',drawn:pick(PRACTICES),own:''};},
+  start:function(){
+    var own=(S.own||'').trim();
+    var p=own||S.drawn; if(!p){S.err='Draw a Practice card or type your own practice.';return;}
+    newGame(p);
+  },
+  draw:function(){
+    var w=drawAngle();var t={id:uid(),kind:'angle',words:[w]};S.terms.push(t);S.drew=t.id;flipId=t.id;S.form.str=null;S.step='mods';
+  },
+  selectMod:function(d){S.sel={id:d.id,term:'',text:'',rival:''};S.err='';},
+  cancelMod:function(){S.sel=null;S.err='';},
+  playMod:function(){
+    var card=S.hand.filter(function(c){return c.id===S.sel.id;})[0]; if(!card)return;
+    var d=MODS[card.type],sel=S.sel,txt=(sel.text||'').trim();
+    if(d.t==='rival'){
+      var r=rivalByName(sel.rival||(aliveRivals()[0]||{}).name); if(!r){S.err='Pick a rival team.';return;}
+      if(card.type==='steal'&&!newestAngle()){S.err='You need an Angle card before you can Steal.';return;}
+      hitRival(r,card.type);
+    }else if(card.type==='or'){
+      var t=termById(sel.term||S.terms[0].id); if(!txt){S.err='Type a synonym.';return;}
+      t.words.push(txt);S.ev.push({k:'mine',t:'You added '+txt+' with OR.'});
+    }else if(card.type==='trunc'){
+      var t2=termById(sel.term||S.terms[0].id),base=stripQ(t2.words[0]).toLowerCase(),root=txt.replace(/\*+$/,'').toLowerCase();
+      if(base.indexOf(' ')>=0){S.err='Truncation works on one word. Pick a single-word term.';return;}
+      if(root.length<3||base.indexOf(root)!==0||root===base){S.err='Type the first part of '+base+', at least 3 letters, such as '+base.slice(0,Math.max(3,base.length-3))+'.';return;}
+      t2.words[0]=root+'*';S.ev.push({k:'mine',t:'You truncated '+base+' to '+root+'*.'});
+    }else if(card.type==='synonym'||card.type==='subject'){
+      var t3=termById(sel.term||(angleTerms()[0]||{}).id); if(!t3){S.err='You need an Angle card to swap.';return;}
+      if(!txt){S.err=card.type==='subject'?'Copy a subject from a Primo record and paste it here.':'Type a synonym.';return;}
+      var old=stripQ(t3.words[0]);t3.words=[txt];S.ev.push({k:'mine',t:'You swapped '+old+' for '+txt+'.'});
+    }else if(card.type==='scavenger'){
+      var t4=termById(S.drew); if(!t4){S.err='Scavenger only works in a round where you drew an Angle card.';return;}
+      if(!sel.choice){S.err='Pick one of the three cards.';return;}
+      var oldw=t4.words[0]; t4.words=[sel.choice];
+      S.angleDeck=S.angleDeck.filter(function(w){return w!==sel.choice;});S.angleDeck.push(oldw);
+      flipId=t4.id;S.ev.push({k:'mine',t:'Scavenger: you swapped '+oldw+' for '+sel.choice+'.'});
+    }
+    S.hand=S.hand.filter(function(c){return c.id!==card.id;});S.modDiscard.push(card);
+    S.sel=null;S.err='';S.form.str=null;S.modStage='rivals';rivalMoves();
+  },
+  pass:function(){S.sel=null;S.err='';S.ev.push({k:'',t:'You passed on Mods this round.'});S.modStage='rivals';rivalMoves();},
+  take:function(){applyAttack(S.pending.shift());},
+  shield:function(){var p=S.pending.shift();discardType('shield');S.ev.push({k:'mine',t:'You blocked '+p.from+'’s '+MODS[p.type].name+' with Shield.'});},
+  bounce:function(){var p=S.pending.shift();discardType('bounce');var r=rivalByName(p.from);if(r)r.mult*=rand(0.3,0.6);S.ev.push({k:'mine',t:'You bounced '+MODS[p.type].name+' back to '+p.from+'.'});},
+  toSearch:function(){S.step='search';S.err='';},
+  resetStr:function(){S.form.str=null;},
+  copyStr:function(){copyText(currentString(),'copyStrMsg');},
+  lockIn:function(){
+    var str=currentString().trim(),f=S.form;
+    var miss=checkString(str).filter(function(i){return !i.ok;});
+    if(miss.length){S.err='Your search is missing: '+miss.map(function(m){return m.label;}).join(', ')+'.';return;}
+    var cnt=parseInt(String(f.count).replace(/[^0-9]/g,''),10);
+    if(isNaN(cnt)){S.err='Type the Result # from Primo. Use 0 if Primo found nothing.';return;}
+    if(cnt>0&&(!f.title.trim()||wc(f.why)<5)){S.err='Add one usable title and one sentence (5+ words) on how it connects to your Practice word and an Angle word. If you can’t find a usable title, you’re out: set Result # to 0.';return;}
+    var alive=cnt>0;
+    S.log.push({round:S.round,str:logString(str),count:cnt,title:alive?f.title.trim():'',why:alive?f.why.trim():'',out:!alive});
+    S.lastCount=cnt;S.err='';
+    simulateRivals();
+    S.step='counts';
+    if(!alive)S.status='out';
+  },
+  next:function(){
+    if(S.status==='out'){
+      if(!S.resUsed){S.phase='resurrect';S.res={term:'',method:'or',word:'',why:'',applied:false};S.form={count:'',title:'',why:'',str:null};S.err='';}
+      else{S.outcome='lose';S.phase='over';}
+      return;
+    }
+    if(S.round>=6||!aliveRivals().length){S.outcome='win';S.phase='over';return;}
+    drawMods(3-S.hand.length);startRound(S.round+1);
+  },
+  applyFix:function(){
+    var r=S.res,w=(r.word||'').trim(),t=termById(r.term||S.terms[S.terms.length-1].id);
+    if(!(r.why||'').trim()){S.err='Write why that word killed your search.';return;}
+    if(!w){S.err=r.method==='or'?'Type a synonym to add with OR.':'Type a broader word.';return;}
+    if(r.method==='or')t.words.push(w);
+    else{if(t.kind==='practice'||t.hasPractice){S.err='Your Practice word stays. Add a synonym with OR instead.';return;}t.words=[w];}
+    r.applied=true;r.killer=termLabel(t);S.form.str=null;S.err='';
+  },
+  resLock:function(){
+    var str=currentString().trim(),f=S.form;
+    var miss=checkString(str).filter(function(i){return !i.ok;});
+    if(miss.length){S.err='Your search is missing: '+miss.map(function(m){return m.label;}).join(', ')+'.';return;}
+    var cnt=parseInt(String(f.count).replace(/[^0-9]/g,''),10);
+    if(isNaN(cnt)){S.err='Type the Result # from Primo. Use 0 if Primo found nothing.';return;}
+    if(cnt>0&&(!f.title.trim()||wc(f.why)<5)){S.err='Add one usable title and one sentence (5+ words) on how it connects.';return;}
+    S.resUsed=true;
+    S.log.push({round:'Fix',str:logString(str),count:cnt,title:cnt>0?f.title.trim():'',why:cnt>0?f.why.trim():'',out:cnt===0,fix:S.res.why});
+    if(cnt>0){S.status='alive';S.phase='play';
+      if(S.round>=6||!aliveRivals().length){S.outcome='win';S.phase='over';return;}
+      drawMods(3-S.hand.length);startRound(S.round+1);}
+    else{S.outcome='lose';S.phase='over';}
+  },
+  copyLog:function(){copyText(logText(),'copyLogMsg');},
+  copyBridge:function(){copyText(bridgeString(),'copyBridgeMsg');}
+};
+function wc(s){return String(s||'').trim().split(/\s+/).filter(Boolean).length;}
+function termById(id){return S.terms.filter(function(t){return t.id===id;})[0];}
+function discardType(type){for(var i=0;i<S.hand.length;i++){if(S.hand[i].type===type){S.modDiscard.push(S.hand.splice(i,1)[0]);return;}}}
+function bridgeString(){
+  var b=S.bridge,p=(b.p||'').trim(); if(!p)return '';
+  return [p,(b.a1||'').trim(),(b.a2||'').trim()].filter(Boolean).join(' AND ');
+}
+function logText(){
+  var L=['LAST SEARCH STANDING: SOLO GAME LOG','Practice: '+S.practice,'Result: '+(S.outcome==='win'?'Survived':'Knocked out'),''];
+  S.log.forEach(function(e){
+    L.push('Round '+e.round+': '+e.str);
+    L.push('  Result #: '+fmt(e.count)+(e.out?'  (OUT)':''));
+    if(e.fix)L.push('  Why the old search died: '+e.fix);
+    if(e.title)L.push('  Usable title: '+e.title);
+    if(e.why)L.push('  Connection: '+e.why);
+  });
+  L.push('','REFLECTION');
+  QS.forEach(function(q,i){L.push((i+1)+'. '+q,'   '+(S.reflect['q'+(i+1)]||''));});
+  var b=bridgeString(); if(b)L.push('','MY OWN SEARCH: '+b);
+  return L.join('\n');
+}
+var QS=['Which word killed a search, or came closest? Why that word?','Which filter cut your results the most? Were the results that were left better or worse?','Look at your usable titles. What do they have in common?'];
+function copyText(text,msgId){
+  function done(ok){var el=document.getElementById(msgId);if(!el)return;
+    if(ok){el.textContent='Copied.';}
+    else{el.innerHTML='Copy did not work here. Select the text below and copy it.<textarea class="copyfall" readonly>'+esc(text)+'</textarea>';var ta=el.querySelector('textarea');if(ta){ta.focus();ta.select();}}}
+  try{navigator.clipboard.writeText(text).then(function(){done(true);},function(){done(false);});}catch(e){done(false);}
+}
+
+/* ---------- rendering ---------- */
+var app=document.getElementById('app'),track=document.getElementById('track');
+function cardHTML(kind,word,label,foot,id){
+  var cls={p:'p',a:'a'}[kind];
+  return '<div class="card '+cls+(id&&id===flipId?' flip':'')+'"><div class="hd"><span>'+label+'</span></div><div class="wd">'+esc(word)+'</div>'+(foot?'<div class="ft">'+esc(foot)+'</div>':'')+'</div>';
+}
+function render(){
+  if(!S){S={phase:'intro',drawn:null,own:''};}
+  renderTrack();
+  if(S.phase==='intro')app.innerHTML=intro();
+  else if(S.phase==='play')app.innerHTML='<div class="grid"><div style="display:flex;flex-direction:column;gap:24px;min-width:0">'+stage()+logPanel()+'</div><aside class="side">'+teamPanel()+rivalPanel()+'</aside></div>';
+  else if(S.phase==='resurrect')app.innerHTML='<div class="grid"><div style="display:flex;flex-direction:column;gap:24px;min-width:0">'+resurrect()+logPanel()+'</div><aside class="side">'+teamPanel()+rivalPanel()+'</aside></div>';
+  else app.innerHTML=over();
+  flipId=null;save();
+}
+function renderTrack(){
+  if(!S||S.phase==='intro'){track.innerHTML='';return;}
+  var h='';for(var i=1;i<=6;i++){var c=i<S.round?'done':i===S.round&&S.phase!=='over'?'now':'';h+='<span class="'+c+'" aria-label="Round '+i+'">R'+i+'</span>';}
+  track.innerHTML=h;
+}
+function intro(){
+  var d=S.drawn;
+  return '<section class="hero">'+
+   '<div style="display:flex;flex-direction:column;gap:18px">'+
+    '<p class="eyebrow">A library search game · Solo</p>'+
+    '<h1>Keep your search alive.</h1>'+
+    '<p class="lede">You start with one creative practice. Every round adds a new word to your library search. Three computer teams play Mod cards on you. If Primo finds 0 results, or you can’t find a usable title, you’re out.</p>'+
+    '<div class="four"><div><b>1 · Draw</b><span>Flip an Angle card. It joins your search with AND.</span></div><div><b>2 · Mods</b><span>Play one Mod card, or pass. Rivals may hit you.</span></div><div><b>3 · Search</b><span>Run the search in Primo. Enter the Result # and one usable title.</span></div><div><b>4 · Counts</b><span>Compare counts. 0 means out.</span></div></div>'+
+    '<p class="note-box info small"><b>Real and simulated.</b> Your counts come from your own Primo searches. The three computer teams’ counts are simulated by the game.</p>'+
+    '<p class="small">Keep Primo open in another tab: <a href="'+PRIMO+'" target="_blank" rel="noopener">Open NOVA Primo</a>. Sign in with your MyNOVA username and password.</p>'+
+   '</div>'+
+   '<div class="panel stage">'+
+    '<h2>Your Practice card</h2>'+
+    '<p class="muted small">This word stays in your search all game.</p>'+
+    '<div class="row">'+(d?cardHTML('p',d,'PRACTICE','Your starting search','pd'):'<div class="back p" aria-hidden="true">P</div>')+
+    '<button class="btn alt" data-act="drawPractice" type="button">'+(d?'Draw again':'Draw a Practice card')+'</button></div>'+
+    '<label for="own">Or use your own creative practice<input type="text" id="own" data-bind="own" value="'+esc(S.own)+'" placeholder="e.g. crochet"></label>'+
+    (S.err?'<p class="note-box err">'+esc(S.err)+'</p>':'')+
+    '<button class="btn" data-act="start" type="button">Start game</button>'+
+   '</div></section>';
+}
+function callBar(){
+  return '<div class="call">'+CALLS.map(function(c,i){var on=(S.step==='draw'&&i===0)||(S.step==='mods'&&i===1)||(S.step==='search'&&i===2)||(S.step==='counts'&&i===3);return '<span class="'+(on?'on':'')+'">'+c+'</span>';}).join('')+'</div>';
+}
+function stage(){
+  var h='<section class="panel stage" aria-live="polite"><div class="row" style="justify-content:space-between"><p class="eyebrow">Round '+S.round+' of 6</p>'+callBar()+'</div>';
+  if(S.step==='draw')h+=drawStep();
+  else if(S.step==='mods')h+=modsStep();
+  else if(S.step==='search')h+=searchStep();
+  else h+=countsStep();
+  return h+'</section>';
+}
+function drawStep(){
+  return '<h2>Draw an Angle card</h2><p>The new word joins your search with AND. Every Angle card makes the pile of results smaller.</p>'+
+   '<div class="row"><div class="back a" aria-hidden="true">A</div><button class="btn" data-act="draw" type="button">Draw</button></div>';
+}
+function evFeed(){
+  if(!S.ev.length)return '';
+  return '<div class="feed">'+S.ev.map(function(e){return '<div class="ev '+e.k+'">'+esc(e.t)+'</div>';}).join('')+'</div>';
+}
+function modsStep(){
+  var h='<h2>Mods</h2>';
+  if(S.modStage==='choose'){
+    var a=newestAngle();
+    h+='<p>You drew <b>'+esc(a?a.words[0]:'')+'</b>. Play one Mod card from your hand, or pass.</p>';
+    if(S.sel)h+=modForm();
+    else h+='<p class="muted small">Pick a card on the right under <b>Your Mod hand</b>.</p><div class="row"><button class="btn alt" data-act="pass" type="button">Pass</button></div>';
+    if(S.err)h+='<p class="note-box err">'+esc(S.err)+'</p>';
+    h+=evFeed();
+    return h;
+  }
+  h+=evFeed();
+  if(S.pending.length){
+    var p=S.pending[0],d=MODS[p.type];
+    var hasS=S.hand.some(function(c){return c.type==='shield';}),hasB=S.hand.some(function(c){return c.type==='bounce';});
+    h+='<div class="note-box err">'+esc(p.from)+' played <b>'+esc(d.name)+'</b> on you.'+(p.type==='not'?' The word: '+esc(p.word)+'.':'')+'</div>'+
+      '<p class="small">'+esc(d.x)+'</p>'+
+      '<div class="row"><button class="btn" data-act="take" type="button">Take it</button>'+
+      (hasS?'<button class="btn alt" data-act="shield" type="button">Block with Shield</button>':'')+
+      (hasB?'<button class="btn alt" data-act="bounce" type="button">Bounce it back</button>':'')+'</div>';
+  }else h+='<div class="row"><button class="btn" data-act="toSearch" type="button">Go to Search</button></div>';
+  return h;
+}
+function termOptions(list,selId){return list.map(function(t){return '<option value="'+t.id+'"'+(t.id===selId?' selected':'')+'>'+esc(termLabel(t))+'</option>';}).join('');}
+function modForm(){
+  var card=S.hand.filter(function(c){return c.id===S.sel.id;})[0]; if(!card)return '';
+  var d=MODS[card.type],sel=S.sel,h='<div class="mod sel"><div class="hd"><span>MOD</span><span>'+(d.t==='rival'?'PLAY ON A RIVAL':'PLAY ON YOURSELF')+'</span></div><div class="bd"><div class="nm">'+esc(d.name)+'</div><div class="tx">'+esc(d.x)+'</div></div></div>';
+  if(d.t==='rival'){
+    h+='<label for="selRival">Which rival?<select id="selRival" data-bind="sel.rival">'+aliveRivals().map(function(r){return '<option'+(r.name===sel.rival?' selected':'')+'>'+esc(r.name)+'</option>';}).join('')+'</select></label>';
+  }else if(card.type==='or'){
+    h+='<label for="selTerm">Which word?<select id="selTerm" data-bind="sel.term">'+termOptions(S.terms,sel.term)+'</select></label><label for="selText">Synonym to add with OR<input type="text" id="selText" data-bind="sel.text" value="'+esc(sel.text)+'" placeholder="e.g. fanzines"></label>';
+  }else if(card.type==='trunc'){
+    h+='<label for="selTerm">Which word?<select id="selTerm" data-bind="sel.term">'+termOptions(S.terms.filter(function(t){return stripQ(t.words[0]).indexOf(' ')<0&&t.words[0].slice(-1)!=='*';}),sel.term)+'</select></label><label for="selText">Root (the game adds the *)<input type="text" id="selText" data-bind="sel.text" value="'+esc(sel.text)+'" placeholder="e.g. knit"></label>';
+  }else if(card.type==='synonym'||card.type==='subject'){
+    h+='<label for="selTerm">Which Angle word?<select id="selTerm" data-bind="sel.term">'+termOptions(angleTerms(),sel.term)+'</select></label><label for="selText">'+(card.type==='subject'?'Subject copied from a Primo record':'New word')+'<input type="text" id="selText" data-bind="sel.text" value="'+esc(sel.text)+'"></label>'+
+      (card.type==='subject'?'<p class="small muted">In Primo, open a result and scroll to Subjects. Copy one that fits your topic.</p>':'');
+  }else if(card.type==='scavenger'){
+    var top=S.angleDeck.slice(0,3);
+    h+='<p class="small">Keep one. The Angle card you drew this round goes to the bottom of the deck.</p><div class="row">'+top.map(function(w){return '<button class="btn alt'+(sel.choice===w?'':'')+'" data-act="scav" data-w="'+esc(w)+'" type="button" aria-pressed="'+(sel.choice===w)+'">'+esc(w)+'</button>';}).join('')+'</div>';
+  }
+  h+='<div class="row"><button class="btn" data-act="playMod" type="button">Play '+esc(d.name)+'</button><button class="btn alt" data-act="cancelMod" type="button">Cancel</button></div>';
+  return h;
+}
+function checksHTML(str){
+  return checkString(str).map(function(i){return '<span class="chk '+(i.ok?'ok':'no')+'">'+(i.ok?'✓ ':'✗ ')+esc(i.label)+'</span>';}).join('');
+}
+function searchBox(){
+  var str=currentString();
+  return '<label for="q">Your search string<textarea class="query" id="q" data-bind="form.str" spellcheck="false">'+esc(str)+'</textarea></label>'+
+   '<div class="row"><button class="btn alt" data-act="copyStr" type="button">Copy search</button><button class="ghost" data-act="resetStr" type="button">Rebuild from my cards</button><a href="'+PRIMO+'" target="_blank" rel="noopener">Open Primo in a new tab</a><span id="copyStrMsg" class="small muted" role="status"></span></div>'+
+   '<div><p class="eyebrow" style="margin-bottom:6px">Must include</p><div class="checks" id="checks">'+checksHTML(str)+'</div></div>'+
+   '<div id="opsWarn">'+(lowerOps(str)?'<p class="note-box warn">Primo ignores lowercase and, or, not. Type them in capitals.</p>':'')+'</div>'+
+   (S.filters.length?'<div><p class="eyebrow" style="margin-bottom:6px">Turn on in Primo, then click the lock icon</p><div class="filters">'+S.filters.map(function(f){return '<span class="filter">'+esc(f)+'</span>';}).join('')+'</div></div>':'');
+}
+function resultFields(){
+  var f=S.form;
+  return '<div class="fields"><label for="cnt">Result #<input type="text" inputmode="numeric" id="cnt" data-bind="form.count" value="'+esc(f.count)+'" placeholder="0"></label>'+
+   '<label for="ttl">One usable title<input type="text" id="ttl" data-bind="form.title" value="'+esc(f.title)+'" placeholder="Copy the title from Primo"></label></div>'+
+   '<label for="why">One sentence: how does this title connect to your Practice word and an Angle word?<textarea class="note" id="why" data-bind="form.why">'+esc(f.why)+'</textarea></label>';
+}
+function searchStep(){
+  return '<h2>Search</h2>'+
+   '<ol class="steps"><li>Copy your search string.</li><li>Paste it into the <b>first row</b> of Primo Advanced Search and run it.</li><li>Turn on any filters listed below.</li><li>Write down the Result # at the top of the results list.</li><li>Open a result and decide if the title is usable.</li></ol>'+
+   searchBox()+resultFields()+
+   (S.err?'<p class="note-box err">'+esc(S.err)+'</p>':'')+
+   '<div class="row"><button class="btn" data-act="lockIn" type="button">Lock in round '+S.round+'</button></div>'+
+   (S.round===1?'<p class="small muted">Round 1 is your Practice word alone. Angle cards and Mods start in round 2.</p>':'');
+}
+function scoreTable(){
+  var h='<div class="tbl-wrap"><table><thead><tr><th>Team</th>';for(var i=1;i<=6;i++)h+='<th class="n">R'+i+'</th>';h+='</tr></thead><tbody>';
+  var mine=S.log.filter(function(e){return e.round!=='Fix';});
+  h+='<tr class="you"><td><b>You</b> · '+esc(S.practice)+'</td>';
+  for(var j=1;j<=6;j++){var e=mine[j-1];h+='<td class="n">'+(e?(e.count===0?'<span class="outc">0</span>':fmt(e.count)):'')+'</td>';}
+  h+='</tr>';
+  S.rivals.forEach(function(r){
+    h+='<tr><td>'+esc(r.name)+' · '+esc(r.practice)+'</td>';
+    for(var k=0;k<6;k++){var v=r.hist[k];h+='<td class="n">'+(v===0?'<span class="outc">0</span>':v==null?(k<r.hist.length?'<span class="muted">out</span>':''):fmt(v))+'</td>';}
+    h+='</tr>';
+  });
+  return h+'</tbody></table></div><p class="small muted">Computer teams’ counts are simulated. Yours are real.</p>';
+}
+function countsStep(){
+  var c=S.lastCount,out=S.status==='out',h='<h2>Counts</h2>';
+  h+='<div class="row" style="gap:20px;align-items:flex-end"><div><p class="eyebrow">Your Result #</p><div class="big">'+fmt(c)+'</div></div>'+
+     '<p class="note-box '+(out?'err':'good')+'">'+(out?'Your search hit 0 or had no usable title. You’re out.':'Your search is alive.')+'</p></div>';
+  h+=evFeed()+scoreTable();
+  var label=out?(S.resUsed?'See results':'Try your resurrection'):(S.round>=6||!aliveRivals().length?'See results':'Start round '+(S.round+1));
+  return h+'<div class="row"><button class="btn" data-act="next" type="button">'+label+'</button></div>';
+}
+function teamPanel(){
+  var h='<section class="panel"><p class="eyebrow">Your cards</p><div class="cards">';
+  S.terms.forEach(function(t){
+    var k=t.kind==='angle'?'a':'p',lab=t.kind==='angle'?'ANGLE':t.kind==='phrase'?'PHRASE':'PRACTICE';
+    h+=cardHTML(k,termLabel(t),lab,'',t.id);
+  });
+  h+='</div>';
+  if(S.nots.length)h+='<p class="small"><b>Excluded:</b> '+S.nots.map(function(n){return 'NOT '+esc(n);}).join(', ')+'</p>';
+  if(S.filters.length)h+='<div><p class="small"><b>Filters on:</b></p><div class="filters">'+S.filters.map(function(f){return '<span class="filter">'+esc(f)+'</span>';}).join('')+'</div></div>';
+  h+='</section>';
+  h+='<section class="panel"><p class="eyebrow">Your Mod hand</p><div class="hand">';
+  var canPlay=S.phase==='play'&&S.step==='mods'&&S.modStage==='choose';
+  S.hand.forEach(function(c){
+    var d=MODS[c.type],react=d.t==='react';
+    h+='<div class="mod'+(react?' held':'')+(S.sel&&S.sel.id===c.id?' sel':'')+'"><div class="hd"><span>MOD</span><span>'+(react?'HELD':d.t==='rival'?'ON A RIVAL':'ON YOURSELF')+'</span></div><div class="bd"><div class="nm">'+esc(d.name)+'</div><div class="tx">'+esc(d.x)+'</div>'+
+      (react?'<div class="small muted">Used when a rival hits you.</div>':canPlay?'<div><button class="btn alt" data-act="selectMod" data-id="'+c.id+'" type="button">Play this</button></div>':'')+'</div></div>';
+  });
+  if(!S.hand.length)h+='<p class="small muted">No Mod cards. You draw back to 3 after each round.</p>';
+  return h+'</div></section>';
+}
+function rivalPanel(){
+  var h='<section class="panel"><p class="eyebrow">Computer teams</p>';
+  S.rivals.forEach(function(r){
+    var st=!r.alive?'Out':r.back?'Back next round':r.count==null?'Waiting':fmt(r.count)+' results';
+    h+='<div class="row" style="justify-content:space-between"><span><b>'+esc(r.name)+'</b><br><span class="small muted">'+esc(r.practice)+'</span></span><span class="small" style="font-family:var(--mono)">'+esc(st)+'</span></div>';
+  });
+  return h+'<p class="small muted">Counts simulated.</p></section>';
+}
+function logPanel(){
+  if(!S.log.length)return '';
+  var h='<section class="panel"><p class="eyebrow">Team log</p><div class="tbl-wrap"><table><thead><tr><th>Rnd</th><th>Search string</th><th class="n">Result #</th><th>Usable title</th></tr></thead><tbody>';
+  S.log.forEach(function(e){h+='<tr><td>'+esc(e.round)+'</td><td class="str">'+esc(e.str)+'</td><td class="n">'+(e.count===0?'<span class="outc">0</span>':fmt(e.count))+'</td><td>'+esc(e.title)+(e.out?' <span class="outc">Out</span>':'')+'</td></tr>';});
+  return h+'</tbody></table></div></section>';
+}
+function resurrect(){
+  var r=S.res,h='<section class="panel stage"><div class="row" style="justify-content:space-between"><p class="eyebrow">Resurrection · one per game</p></div><h2>Knocked out. Fix your search.</h2>';
+  if(!r.applied){
+    h+='<p>Find the word that killed your search. Then fix it: add a synonym with OR, or replace it with a broader word. Your Practice word stays.</p>'+
+     '<label for="rTerm">The word that killed your search<select id="rTerm" data-bind="res.term">'+termOptions(S.terms,r.term||S.terms[S.terms.length-1].id)+'</select></label>'+
+     '<label for="rWhy">Why did it kill your search?<textarea class="note" id="rWhy" data-bind="res.why">'+esc(r.why)+'</textarea></label>'+
+     '<div class="row" role="radiogroup" aria-label="Fix method">'+
+      '<label style="flex-direction:row;align-items:center;gap:8px;font-weight:400"><input type="radio" name="m" data-bind="res.method" value="or"'+(r.method==='or'?' checked':'')+'> Add a synonym with OR</label>'+
+      '<label style="flex-direction:row;align-items:center;gap:8px;font-weight:400"><input type="radio" name="m" data-bind="res.method" value="replace"'+(r.method==='replace'?' checked':'')+'> Replace it with a broader word</label></div>'+
+     '<label for="rWord">New word<input type="text" id="rWord" data-bind="res.word" value="'+esc(r.word)+'" placeholder="e.g. family"></label>'+
+     (S.err?'<p class="note-box err">'+esc(S.err)+'</p>':'')+
+     '<div class="row"><button class="btn" data-act="applyFix" type="button">Apply fix</button></div>';
+  }else{
+    h+='<p class="note-box good">Fix applied to '+esc(r.killer)+'. Now run the new search.</p>'+searchBox()+resultFields()+
+     (S.err?'<p class="note-box err">'+esc(S.err)+'</p>':'')+
+     '<div class="row"><button class="btn" data-act="resLock" type="button">Lock in my fix</button></div>';
+  }
+  return h+'</section>';
+}
+function over(){
+  var win=S.outcome==='win',survived=S.log.filter(function(e){return e.round!=='Fix'&&e.count>0;}).length;
+  var standing=aliveRivals().length;
+  var head=win?(standing?'You made it through all six rounds.':'Last search standing.'):'Your search is out.';
+  var sub=win?(standing?standing+' computer team'+(standing>1?'s are':' is')+' still standing too.':'Every computer team hit 0 before you did.'):'You survived '+survived+' round'+(survived===1?'':'s')+'.';
+  var h='<section class="hero"><div style="display:flex;flex-direction:column;gap:14px;min-width:0"><p class="eyebrow">Game over · '+esc(S.practice)+'</p><h1>'+esc(head)+'</h1><p class="lede">'+esc(sub)+'</p>'+scoreTable()+'</div>'+
+   '<div class="panel stage"><h2>Reflect</h2>'+QS.map(function(q,i){var k='q'+(i+1);return '<label for="'+k+'">'+esc(q)+'<textarea class="note" id="'+k+'" data-bind="reflect.'+k+'">'+esc(S.reflect[k])+'</textarea></label>';}).join('')+'</div></section>';
+  h+='<div style="display:flex;flex-direction:column;gap:24px;margin-top:24px">'+logPanel().replace('Team log','Your full log')+
+   '<section class="panel"><h2>Now try your own topic</h2><p>Type your own creative practice and two angles you care about. Run the search in Primo before you leave.</p>'+
+   '<div class="fields" style="grid-template-columns:repeat(3,minmax(0,1fr))"><label for="bp">My practice<input type="text" id="bp" data-bind="bridge.p" value="'+esc(S.bridge.p)+'"></label><label for="ba1">Angle 1<input type="text" id="ba1" data-bind="bridge.a1" value="'+esc(S.bridge.a1)+'"></label><label for="ba2">Angle 2<input type="text" id="ba2" data-bind="bridge.a2" value="'+esc(S.bridge.a2)+'"></label></div>'+
+   '<p class="query" id="bridgeOut" style="min-height:0">'+esc(bridgeString()||'Your search string appears here.')+'</p>'+
+   '<div class="row"><button class="btn alt" data-act="copyBridge" type="button">Copy search</button><a href="'+PRIMO+'" target="_blank" rel="noopener">Open Primo</a><span id="copyBridgeMsg" class="small muted" role="status"></span></div></section>'+
+   '<section class="panel"><h2>Turn it in</h2><p>Copy your log and reflection, then paste them where your instructor asks.</p><div class="row"><button class="btn" data-act="copyLog" type="button">Copy my log</button><button class="btn alt" data-act="again" type="button">Play again</button></div><div id="copyLogMsg" class="small muted" role="status"></div></section></div>';
+  return h;
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',function(e){
+  var b=e.target.closest('[data-act]'); if(!b)return;
+  var act=b.getAttribute('data-act');
+  if(act==='scav'){S.sel.choice=b.getAttribute('data-w');render();return;}
+  if(act==='again'){S={phase:'intro',drawn:null,own:''};render();window.scrollTo(0,0);return;}
+  if(!A[act])return;
+  var noRender={copyStr:1,copyLog:1,copyBridge:1};
+  A[act]({id:b.getAttribute('data-id')});
+  if(!noRender[act]){render();var st=document.querySelector('.stage');if(st&&['draw','next','toSearch','lockIn','start','resLock','applyFix'].indexOf(act)>=0&&st.getBoundingClientRect().top<0)st.scrollIntoView({behavior:'smooth',block:'start'});}
+  else save();
+});
+function setPath(path,val){var p=path.split('.'),o=S;for(var i=0;i<p.length-1;i++){if(!o[p[i]])o[p[i]]={};o=o[p[i]];}o[p[p.length-1]]=val;}
+function onInput(e){
+  var el=e.target,path=el.getAttribute&&el.getAttribute('data-bind'); if(!path||!S)return;
+  if(el.type==='radio'&&!el.checked)return;
+  setPath(path,el.value);
+  if(path==='form.str'){var c=document.getElementById('checks');if(c)c.innerHTML=checksHTML(el.value);var w=document.getElementById('opsWarn');if(w)w.innerHTML=lowerOps(el.value)?'<p class="note-box warn">Primo ignores lowercase and, or, not. Type them in capitals.</p>':'';}
+  if(path.indexOf('bridge.')===0){var bo=document.getElementById('bridgeOut');if(bo)bo.textContent=bridgeString()||'Your search string appears here.';}
+  save();
+}
+document.addEventListener('input',onInput);
+document.addEventListener('change',onInput);
+
+var ng=document.getElementById('newgame'),ngT=null;
+ng.addEventListener('click',function(){
+  if(ng.getAttribute('data-arm')){clearTimeout(ngT);ng.removeAttribute('data-arm');ng.textContent='New game';S={phase:'intro',drawn:null,own:''};render();window.scrollTo(0,0);return;}
+  ng.setAttribute('data-arm','1');ng.textContent='Click again to start over';
+  ngT=setTimeout(function(){ng.removeAttribute('data-arm');ng.textContent='New game';},3500);
+});
+
+function start(data){
+  S=(data&&data.S)||load()||null;
+  if(S&&S.v!==1&&S.phase!=='intro')S=null;
+  render();
+}
+var hot=window.claude&&window.claude.hot;
+if(hot&&hot.snapshot)hot.snapshot(function(){return {S:S};});
+if(hot&&hot.ready)hot.ready(start);else start((hot&&hot.data)||{});
+})();
+</script>
+
+</body>
+</html>
