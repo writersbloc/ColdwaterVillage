@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conference Sign-Up</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* ===== SETTINGS: paste your Apps Script web app URL in the script tag at the bottom ===== */
+/* Layout: four day columns of 15-minute slots under a Coldwater sunset strip; one column on phones */
+:root {
+  --bg: #F5F3F8; --surface: #FFFFFF; --sunk: #ECE8F2; --ink: #1D1630; --muted: #5E566D; --line: #D6CEE2;
+  --practice: #8A3FBF; --practice-soft: #F1E7F9; --on-accent: #FFFFFF;
+  --angle: #0F7F72; --angle-soft: #E1F3F0;
+  --warn: #8A5300; --warn-soft: #FFF2D9; --mod: #B83A33;
+  --sky1: #7A34B0; --sky2: #B5478E; --sky3: #E9615A; --sky4: #E0A63E;
+  --display: 'Bricolage Grotesque', 'Avenir Next', 'Segoe UI', sans-serif;
+  --body: 'Atkinson Hyperlegible', Verdana, 'Segoe UI', sans-serif;
+  --mono: 'IBM Plex Mono', Consolas, monospace;
+  --r: 10px;
+  --row: 44px; --gap: 6px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14111B; --surface: #1F1A29; --sunk: #2A2436; --ink: #EEE9F6; --muted: #A99FBC; --line: #3A3349;
+    --practice: #C391F2; --practice-soft: #2D2240; --on-accent: #14111B;
+    --angle: #4FD0BE; --angle-soft: #14302C;
+    --warn: #F2BE62; --warn-soft: #3A2D12; --mod: #F2857C;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.5; }
+.sky { height: 8px; background: linear-gradient(90deg, var(--sky1), var(--sky2), var(--sky3), var(--sky4)); }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 28px 16px 40px; display: grid; gap: 20px; }
+header { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--practice); }
+h1 { font-family: var(--display); font-weight: 800; font-size: clamp(26px, 4vw, 38px); line-height: 1.1; margin: 0; text-wrap: balance; }
+.intro { color: var(--muted); max-width: 64ch; margin: 0; }
+.namebar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; }
+.namebar label { display: grid; gap: 4px; font-weight: 700; font-size: 14px; flex: 1 1 260px; min-width: 0; }
+.namebar input { font: inherit; font-weight: 400; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--sunk); color: var(--ink); width: 100%; }
+.namebar input:focus-visible { outline: 2px solid var(--practice); outline-offset: 1px; }
+.namebar .hint { font-size: 14px; color: var(--muted); flex: 1 1 260px; margin: 0; }
+.status { font-size: 15px; margin: 0; padding: 10px 14px; border-radius: 8px; background: var(--practice-soft); color: var(--ink); }
+.status.ok { background: var(--angle-soft); }
+.status.err { background: var(--warn-soft); color: var(--warn); }
+.days { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; align-items: start; }
+@media (max-width: 900px) { .days { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .days { grid-template-columns: 1fr; } }
+.day { display: grid; gap: var(--gap); min-width: 0; align-content: start; }
+.day h2 { font-family: var(--display); font-weight: 600; font-size: 20px; margin: 0 0 2px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.day h2 span { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--muted); }
+.slot { display: grid; grid-template-columns: 50px 1fr auto; gap: 10px; align-items: center; padding: 0 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); height: var(--row); }
+.time { font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; color: var(--muted); }
+.who { font-size: 15px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.slot.open .who { color: var(--muted); }
+.slot.taken { background: var(--sunk); border-color: transparent; }
+.slot.taken .who { color: var(--muted); }
+.slot.mine { background: var(--angle-soft); border-color: var(--angle); }
+.slot.mine .who { color: var(--angle); font-weight: 700; }
+.slot button { font: inherit; font-size: 14px; font-weight: 700; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--practice); background: var(--practice); color: var(--on-accent); cursor: pointer; }
+.slot button.ghost { border-color: var(--line); background: transparent; color: var(--muted); }
+.slot button:focus-visible { outline: 2px solid var(--practice); outline-offset: 2px; }
+.slot button:disabled { opacity: .5; cursor: default; }
+.block { padding: 10px; border-radius: 8px; border: 1px dashed var(--line); background: var(--sunk); color: var(--muted); font-size: 14px; display: grid; grid-template-columns: 50px 1fr; align-content: start; gap: 10px; }
+footer { font-size: 14px; color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { .slot { transition: background .15s; } }
+</style>
+</head>
+<body>
+<div class="sky" aria-hidden="true"></div>
+<main class="wrap">
+  <header>
+    <div class="eyebrow">Prof. Spiegel · Student conferences</div>
+    <h1>Sign up for a 15-minute conference</h1>
+    <p class="intro">Conferences run Monday, October 26 through Thursday, October 29, in my office, AA 252. Enter your name, then pick one open slot. If your plans change, cancel your slot from this same device and pick another.</p>
+  </header>
+
+  <div class="namebar">
+    <label for="studentName">Your name
+      <input id="studentName" type="text" autocomplete="name" placeholder="First and last name" maxlength="60">
+    </label>
+    <p class="hint">One slot per student, please. If none of these times work, email me at cspiegel@nvcc.edu.</p>
+  </div>
+  <p class="status" id="status" role="status" aria-live="polite">Loading open times…</p>
+
+  <div class="days" id="days"></div>
+
+  <footer>All times Eastern. Lunch 12:00–12:30 daily. No conferences Monday and Wednesday 2:00–4:00.</footer>
+</main>
+
+<script>
+// Paste the Web app URL from Apps Script (Deploy > Manage deployments) between the quotes:
+const API_URL = "https://script.google.com/macros/s/AKfycbxM8K0pJ8RIW8tTBgNdtP6Q6n6ci22KmDsqE5WwNbK0lPKdd5bvuIm8IngotVYNbi5avQ/exec";
+
+const DAYS = [
+  { key: "mon", name: "Monday", date: "Oct 26", classBlock: true },
+  { key: "tue", name: "Tuesday", date: "Oct 27", classBlock: false },
+  { key: "wed", name: "Wednesday", date: "Oct 28", classBlock: true },
+  { key: "thu", name: "Thursday", date: "Oct 29", classBlock: false },
+];
+const fmt = m => ((Math.floor(m / 60) - 1) % 12 + 1) + ":" + String(m % 60).padStart(2, "0");
+function rows(day) {
+  const out = [];
+  for (let m = 11 * 60; m < 17 * 60; ) {
+    if (m === 12 * 60) { out.push({ block: "Lunch", start: m, end: m + 30 }); m += 30; continue; }
+    if (day.classBlock && m === 14 * 60) { out.push({ block: "Class", start: m, end: 16 * 60 }); m = 16 * 60; continue; }
+    out.push({ id: day.key + "-" + String(m).padStart(4, "0"), start: m, day }); m += 15;
+  }
+  return out;
+}
+
+// A private random code kept on this device, so a student can cancel their own slot.
+function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+let token = store("confToken");
+if (!token) { token = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()); store("confToken", token); }
+
+const statusEl = document.getElementById("status");
+const nameEl = document.getElementById("studentName");
+nameEl.value = store("confName") || "";
+nameEl.addEventListener("input", () => store("confName", nameEl.value.trim()));
+
+let taken = {};   // slotId -> true
+let mine = null;  // slotId this device holds
+let ready = false;
+let busy = false;
+
+function setStatus(msg, kind) { statusEl.textContent = msg; statusEl.className = "status" + (kind ? " " + kind : ""); }
+
+function render() {
+  const wrap = document.getElementById("days");
+  wrap.innerHTML = "";
+  for (const day of DAYS) {
+    const col = document.createElement("section");
+    col.className = "day";
+    col.setAttribute("aria-label", day.name + " " + day.date);
+    const h = document.createElement("h2");
+    h.textContent = day.name + " ";
+    const d = document.createElement("span"); d.textContent = day.date; h.appendChild(d);
+    col.appendChild(h);
+    for (const r of rows(day)) {
+      if (r.block) {
+        const b = document.createElement("div");
+        b.className = "block";
+        const q = (r.end - r.start) / 15; // quarter hours, so the block matches the slots it replaces
+        b.style.height = "calc(" + q + " * var(--row) + " + (q - 1) + " * var(--gap))";
+        const t = document.createElement("span"); t.className = "time"; t.textContent = fmt(r.start);
+        const l = document.createElement("span"); l.textContent = r.block + ", " + fmt(r.start) + "–" + fmt(r.end);
+        b.append(t, l); col.appendChild(b); continue;
+      }
+      const isMine = mine === r.id;
+      const isTaken = !!taken[r.id];
+      const row = document.createElement("div");
+      row.className = "slot " + (isMine ? "mine" : isTaken ? "taken" : "open");
+      const t = document.createElement("span"); t.className = "time"; t.textContent = fmt(r.start);
+      const who = document.createElement("span"); who.className = "who";
+      who.textContent = isMine ? (store("confName") || "Your slot") : isTaken ? "Reserved" : "Open";
+      row.append(t, who);
+      if (ready && isMine) {
+        const btn = document.createElement("button");
+        btn.className = "ghost"; btn.textContent = "Cancel"; btn.disabled = busy;
+        btn.setAttribute("aria-label", "Cancel your slot, " + day.name + " " + fmt(r.start));
+        btn.onclick = () => cancel(r);
+        row.appendChild(btn);
+      } else if (ready && !isTaken && !mine) {
+        const btn = document.createElement("button");
+        btn.textContent = "Sign up"; btn.disabled = busy;
+        btn.setAttribute("aria-label", "Sign up for " + day.name + " " + fmt(r.start));
+        btn.onclick = () => claim(r);
+        row.appendChild(btn);
+      } else row.appendChild(document.createElement("span"));
+      col.appendChild(row);
+    }
+    wrap.appendChild(col);
+  }
+}
+
+async function call(payload) {
+  // text/plain keeps this a simple request that Apps Script accepts from another site.
+  const res = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
+  return res.json();
+}
+
+function apply(data) {
+  taken = {}; mine = null;
+  for (const id of data.taken || []) taken[id] = true;
+  if (data.mine) mine = data.mine;
+}
+
+async function load(quiet) {
+  try {
+    const data = await call({ action: "list", token });
+    apply(data); ready = true; render();
+    if (!quiet) {
+      const open = DAYS.reduce((n, d) => n + rows(d).filter(r => !r.block && !taken[r.id]).length, 0);
+      if (mine) { const r = findSlot(mine); setStatus("You're signed up for " + r.day.name + ", " + r.day.date + " at " + fmt(r.start) + ".", "ok"); }
+      else setStatus(open + " open times. Enter your name, then choose one.");
+    }
+  } catch (e) {
+    setStatus("The sign-up sheet didn't load. Refresh the page, and if it still doesn't load, email cspiegel@nvcc.edu.", "err");
+  }
+}
+
+function findSlot(id) { for (const d of DAYS) for (const r of rows(d)) if (r.id === id) return r; return null; }
+
+async function claim(r) {
+  const name = nameEl.value.trim();
+  if (!name) { setStatus("Type your name in the box above first, then choose a time.", "err"); nameEl.focus(); return; }
+  busy = true; render(); setStatus("Saving…");
+  try {
+    const data = await call({ action: "claim", slot: r.id, day: r.day.name + " " + r.day.date, time: fmt(r.start), name, token });
+    apply(data);
+    if (data.ok) setStatus("You're signed up for " + r.day.name + ", " + r.day.date + " at " + fmt(r.start) + ". See you then.", "ok");
+    else setStatus(data.message || "That time was just taken. Pick another.", "err");
+  } catch (e) { setStatus("That didn't save. Check your connection and try again.", "err"); }
+  busy = false; render();
+}
+
+async function cancel(r) {
+  busy = true; render(); setStatus("Canceling…");
+  try {
+    const data = await call({ action: "cancel", slot: r.id, token });
+    apply(data);
+    setStatus(data.ok ? "Canceled. That time is open again, and you can pick a new one." : (data.message || "That didn't cancel."), data.ok ? "" : "err");
+  } catch (e) { setStatus("That didn't save. Try again.", "err"); }
+  busy = false; render();
+}
+
+render();
+if (API_URL.indexOf("http") !== 0) setStatus("Setup needed: paste the Apps Script web app URL into API_URL in this file.", "err");
+else { load(); setInterval(() => { if (!busy && document.visibilityState === "visible") load(true); }, 30000); }
+</script>
+</body>
+</html>
