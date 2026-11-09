@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Search Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,500;0,7..72,700;1,7..72,400&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: one narrow working column. Question at top, entry form, then the log as dated cards, newest first. */
+:root {
+  --bg: #FBF9FD;
+  --surface: #FFFFFF;
+  --fg: #231D2E;
+  --muted: #625A70;
+  --line: #E6DFEE;
+  --accent: #8A3FBF;
+  --accent-soft: #F1E8F8;
+  --teal: #137A6C; --teal-bg: #DDF4F0;
+  --amber: #8A5A06; --amber-bg: #FBEFD6;
+  --rose: #B23A34; --rose-bg: #FBE3E1;
+  --display: "Literata", Georgia, serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #17131D; --surface: #201A28; --fg: #EEE9F4; --muted: #ADA3BB; --line: #362D42;
+  --accent: #C79AF0; --accent-soft: #2E2340;
+  --teal: #5FD9C6; --teal-bg: #133A35; --amber: #EDC069; --amber-bg: #3A2E14; --rose: #F2908A; --rose-bg: #3D1E1C;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #17131D; --surface: #201A28; --fg: #EEE9F4; --muted: #ADA3BB; --line: #362D42;
+  --accent: #C79AF0; --accent-soft: #2E2340;
+  --teal: #5FD9C6; --teal-bg: #133A35; --amber: #EDC069; --amber-bg: #3A2E14; --rose: #F2908A; --rose-bg: #3D1E1C;
+  color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.5; }
+.wrap { max-width: 720px; margin: 0 auto; padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 24px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(1.7rem, 4vw, 2.3rem); margin: 0; text-wrap: balance; }
+h2 { font-family: var(--display); font-weight: 500; font-size: 1.25rem; margin: 0; text-wrap: balance; }
+.lede { color: var(--muted); margin: 6px 0 0; max-width: 60ch; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
+label, .lab { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 4px; }
+.hint { font-size: 13px; color: var(--muted); margin: 2px 0 0; }
+input, select, textarea { font: inherit; width: 100%; box-sizing: border-box; padding: 9px 11px; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); color: var(--fg); }
+textarea { min-height: 76px; resize: vertical; }
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 520px) { .row { grid-template-columns: 1fr; } }
+.outcomes { display: flex; flex-wrap: wrap; gap: 8px; }
+.outcomes input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.outcomes label { margin: 0; text-transform: none; letter-spacing: 0; font-size: 15px; font-weight: 600; padding: 6px 14px; border-radius: 99px; border: 1px solid var(--line); color: var(--fg); background: var(--bg); cursor: pointer; }
+.outcomes input:checked + label.found { background: var(--teal-bg); color: var(--teal); border-color: var(--teal); }
+.outcomes input:checked + label.partial { background: var(--amber-bg); color: var(--amber); border-color: var(--amber); }
+.outcomes input:checked + label.dead { background: var(--rose-bg); color: var(--rose); border-color: var(--rose); }
+.outcomes input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
+.next[hidden] { display: none !important; }
+.next { background: var(--accent-soft); border-radius: 8px; padding: 14px; display: grid; gap: 8px; }
+.next p { margin: 0; font-size: 14px; }
+.btns { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+button { font: inherit; font-weight: 600; border-radius: 7px; padding: 9px 16px; cursor: pointer; border: 1px solid var(--accent); }
+.primary { background: var(--accent); color: var(--bg); }
+.ghost { background: transparent; color: var(--accent); }
+.small { font-size: 13px; padding: 5px 10px; }
+.status { font-size: 13px; color: var(--muted); }
+.stats { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.stats b { color: var(--fg); }
+.log { display: grid; gap: 12px; }
+.entry { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 8px; min-width: 0; }
+.entry.example { border-style: dashed; }
+.top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; align-items: baseline; }
+.where { font-weight: 700; }
+.when { font-size: 13px; color: var(--muted); }
+.pill { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 99px; }
+.pill.found { background: var(--teal-bg); color: var(--teal); }
+.pill.partial { background: var(--amber-bg); color: var(--amber); }
+.pill.dead { background: var(--rose-bg); color: var(--rose); }
+.terms { font-family: var(--display); font-style: italic; overflow-wrap: anywhere; margin: 0; }
+.entry p { margin: 0; overflow-wrap: anywhere; }
+.entry .lab { margin: 4px 0 0; }
+.entry a { color: var(--accent); }
+.empty { color: var(--muted); font-size: 15px; margin: 0; }
+.confirm { display: flex; gap: 8px; align-items: center; font-size: 14px; }
+.reminder { font-family: var(--display); font-size: 1.05rem; border-left: 3px solid var(--teal); padding: 4px 0 4px 14px; margin: 0; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+#copyBox[hidden] { display: none !important; }
+#copyBox { min-height: 160px; font-size: 13px; }
+@media (prefers-reduced-motion: no-preference) { button { transition: background .15s, color .15s; } }
+</style>
+<style>body{margin:0}</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Search Log</h1>
+    <p class="lede">Track every search for your essai sources, including the ones that go nowhere. Your log saves in this browser on this device.</p>
+  </header>
+
+  <p class="reminder">A dead end doesn’t mean a dead topic. It means it’s time to try a new approach.</p>
+
+  <section class="card" aria-labelledby="qHead">
+    <h2 id="qHead">My research question</h2>
+    <div>
+      <label for="name">Your name</label>
+      <input id="name" placeholder="First and last name">
+    </div>
+    <div>
+      <label for="question" class="sr">Research question</label>
+      <textarea id="question" placeholder="Paste your revised question from your sticky note."></textarea>
+    </div>
+  </section>
+
+  <form class="card" id="form" aria-labelledby="fHead">
+    <h2 id="fHead">Add a search</h2>
+    <div class="row">
+      <div>
+        <label for="where">Ecosystem</label>
+        <select id="where">
+          <option>Primo</option>
+          <option>ProQuest</option>
+          <option>Google</option>
+          <option>YouTube</option>
+        </select>
+      </div>
+      <div id="otherWrap" hidden>
+        <label for="other">Where else?</label>
+        <input id="other" placeholder="A podcast app, Reddit, a magazine site…">
+      </div>
+    </div>
+    <div>
+      <label for="terms">Search terms</label>
+      <input id="terms" placeholder="Exactly what you typed in" required>
+    </div>
+    <div>
+      <span class="lab">What happened?</span>
+      <div class="outcomes" role="radiogroup" aria-label="What happened">
+        <input type="radio" name="outcome" id="o1" value="found" checked><label for="o1" class="found">Found a great match</label>
+        <input type="radio" name="outcome" id="o2" value="partial"><label for="o2" class="partial">Worth a closer look</label>
+        <input type="radio" name="outcome" id="o3" value="dead"><label for="o3" class="dead">Dead end</label>
+      </div>
+    </div>
+    <div>
+      <label for="findings">Findings</label>
+      <textarea id="findings" placeholder="Titles, authors, links, and a sentence on how each one could support your essai."></textarea>
+    </div>
+    <div class="next" id="next" hidden>
+      <p><b>Try a new approach next.</b> Change your search words, try a different kind of source, or search for one piece of your question.</p>
+    </div>
+    <div>
+      <label for="plan">Next move</label>
+      <input id="plan" placeholder="What you’ll try next, or what this search taught you">
+    </div>
+    <div class="btns">
+      <button type="submit" class="primary" id="save">Add to log</button>
+      <button type="button" class="ghost" id="cancel" hidden>Cancel edit</button>
+      <span class="status" id="status" aria-live="polite"></span>
+    </div>
+  </form>
+
+  <section aria-labelledby="lHead" style="display:grid;gap:14px">
+    <div class="top">
+      <h2 id="lHead">My log</h2>
+      <div class="btns">
+        <button type="button" class="primary small" id="pdf" hidden>Download PDF</button>
+        <button type="button" class="ghost small" id="copy">Copy log as text</button>
+      </div>
+    </div>
+    <div class="stats" id="stats"></div>
+    <span class="status" id="pdfStatus" aria-live="polite"></span>
+    <textarea id="copyBox" readonly hidden aria-label="Your log as text"></textarea>
+    <div class="log" id="log"></div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const KEY = "searchlog.v1";
+const LABEL = { found: "Found a great match", partial: "Worth a closer look", dead: "Dead end" };
+let state = { question: "", entries: [] };
+let editing = null;
+
+function load() { try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); if (s && Array.isArray(s.entries)) state = s; } catch (e) {} }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+const $ = id => document.getElementById(id);
+const esc = s => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const linkify = s => esc(s).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+const fmt = t => new Date(t).toLocaleDateString(undefined, { month: "short", day: "numeric" }) + ", " + new Date(t).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+
+function outcome() { return document.querySelector('input[name="outcome"]:checked').value; }
+function syncForm() {
+  $("otherWrap").hidden = $("where").value !== "Other";
+  $("next").hidden = outcome() !== "dead";
+}
+
+const EXAMPLE = { where: "ProQuest", terms: "why do people procrastinate on hobbies they enjoy", outcome: "dead", findings: "Everything was about procrastinating on work or school.", plan: "Try \"creative practice avoidance\" in Primo instead.", t: null };
+
+function entryHTML(e, i, isExample) {
+  return `<article class="entry${isExample ? " example" : ""}">
+    <div class="top"><span class="where">${esc(e.where)}</span>
+      <span class="when">${isExample ? "Example entry" : fmt(e.t)} · <span class="pill ${e.outcome}">${LABEL[e.outcome]}</span></span></div>
+    <p class="terms">“${esc(e.terms)}”</p>
+    ${e.findings ? `<span class="lab">Findings</span><p>${linkify(e.findings)}</p>` : ""}
+    ${e.plan ? `<span class="lab">Next move</span><p>${linkify(e.plan)}</p>` : ""}
+    ${isExample ? "" : `<div class="btns" data-i="${i}"><button type="button" class="ghost small" data-act="edit">Edit</button><button type="button" class="ghost small" data-act="del">Delete</button></div>`}
+  </article>`;
+}
+
+function render() {
+  const es = state.entries;
+  const places = new Set(es.map(e => e.where)).size;
+  const dead = es.filter(e => e.outcome === "dead").length;
+  const found = es.filter(e => e.outcome === "found").length;
+  $("stats").innerHTML = es.length ? `<span><b>${es.length}</b> searches</span><span><b>${places}</b> ecosystems</span><span><b>${found}</b> great matches</span><span><b>${dead}</b> dead ends</span>` : "";
+  $("log").innerHTML = es.length
+    ? es.map((e, i) => [e, i]).reverse().map(([e, i]) => entryHTML(e, i, false)).join("")
+    : `<p class="empty">Nothing logged yet. Your first search will show up here.</p>`;
+}
+
+function resetForm() {
+  editing = null; $("form").reset(); $("save").textContent = "Add to log"; $("cancel").hidden = true; syncForm();
+}
+
+$("form").addEventListener("submit", ev => {
+  ev.preventDefault();
+  const where = $("where").value === "Other" ? ($("other").value.trim() || "Other") : $("where").value;
+  const e = { where, terms: $("terms").value.trim(), outcome: outcome(), findings: $("findings").value.trim(), plan: $("plan").value.trim() };
+  if (!e.terms) { $("status").textContent = "Add the search terms you used."; $("terms").focus(); return; }
+  if (editing !== null) { e.t = state.entries[editing].t; state.entries[editing] = e; $("status").textContent = "Entry updated."; }
+  else { e.t = Date.now(); state.entries.push(e); $("status").textContent = "Added to your log."; }
+  save(); render(); resetForm();
+});
+$("cancel").addEventListener("click", () => { resetForm(); $("status").textContent = ""; });
+["where"].forEach(id => $(id).addEventListener("change", syncForm));
+document.querySelectorAll('input[name="outcome"]').forEach(r => r.addEventListener("change", syncForm));
+$("question").addEventListener("input", () => { state.question = $("question").value; save(); });
+$("name").addEventListener("input", () => { state.name = $("name").value; save(); });
+
+$("log").addEventListener("click", ev => {
+  const b = ev.target.closest("button"); if (!b) return;
+  const box = b.parentElement; const i = +box.dataset.i;
+  if (b.dataset.act === "edit") {
+    const e = state.entries[i]; editing = i;
+    const known = [...$("where").options].map(o => o.value);
+    if (known.includes(e.where)) { $("where").value = e.where; $("other").value = ""; } else { $("where").value = "Other"; $("other").value = e.where; }
+    $("terms").value = e.terms; $("findings").value = e.findings || ""; $("plan").value = e.plan || "";
+    document.querySelector(`input[name="outcome"][value="${e.outcome}"]`).checked = true;
+    $("save").textContent = "Save changes"; $("cancel").hidden = false; syncForm();
+    $("form").scrollIntoView({ behavior: "smooth", block: "start" }); $("terms").focus({ preventScroll: true });
+  } else if (b.dataset.act === "del") {
+    box.innerHTML = `<span class="confirm">Delete this entry? <button type="button" class="ghost small" data-act="yes">Delete</button><button type="button" class="ghost small" data-act="no">Keep</button></span>`;
+  } else if (b.dataset.act === "yes") {
+    const i2 = +b.closest("[data-i]").dataset.i; state.entries.splice(i2, 1); save(); render(); $("status").textContent = "Entry deleted.";
+  } else if (b.dataset.act === "no") { render(); }
+});
+
+function asText() {
+  const lines = ["SEARCH LOG", "Research question: " + (state.question || "(not entered)"), ""];
+  state.entries.forEach((e, n) => {
+    lines.push(`${n + 1}. ${e.where}: "${e.terms}" (${LABEL[e.outcome]})`);
+    if (e.findings) lines.push("   Findings: " + e.findings);
+    if (e.plan) lines.push("   Next move: " + e.plan);
+  });
+  return lines.join("\n");
+}
+$("copy").addEventListener("click", () => {
+  const text = asText(); const box = $("copyBox");
+  const fallback = () => { box.hidden = false; box.value = text; box.focus(); box.select(); $("copy").textContent = "Select all and copy"; };
+  try { navigator.clipboard.writeText(text).then(() => { $("copy").textContent = "Copied"; setTimeout(() => $("copy").textContent = "Copy log as text", 2000); }, fallback); }
+  catch (e) { fallback(); }
+});
+
+/* PDF export: mirrors the printable Search Log handout, filled in. */
+const plain = t => String(t || "").replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[–—]/g, "-").replace(/…/g, "...").replace(/[^\x00-\xFF]/g, "");
+const ECOS = ["Primo", "ProQuest", "Google", "YouTube"];
+const OUTS = [["found", "Found a great match"], ["partial", "Worth a closer look"], ["dead", "Dead end"]];
+function buildPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "letter" });
+  const W = 792, H = 612, M = 36;
+  const PURPLE = [138, 63, 191], INK = [35, 29, 46], MUTED = [98, 90, 112], LINE = [205, 191, 221], SOFT = [241, 232, 248], TEAL = [19, 122, 108];
+  const cols = [["Ecosystem", 112], ["Search terms", 150], ["What happened", 136], ["Findings", 196], ["Next move", 126]];
+  let page = 1;
+  const footer = () => { doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...MUTED); doc.text("ENG 111 · Dr. Spiegel · page " + page, W - M, H - M + 22, { align: "right" }); };
+  const bar = () => { doc.setFillColor(...PURPLE); doc.rect(0, 0, 10, H, "F"); };
+  const box = (x, y, label, on) => {
+    doc.setDrawColor(...INK); doc.setLineWidth(0.8); doc.rect(x, y, 8, 8);
+    if (on) { doc.setFillColor(...INK); doc.rect(x + 1.8, y + 1.8, 4.4, 4.4, "F"); }
+    doc.setFont("helvetica", on ? "bold" : "normal"); doc.setFontSize(9); doc.setTextColor(...INK); doc.text(label, x + 12, y + 7.5);
+  };
+  const header = (top) => {
+    doc.setFillColor(...SOFT); doc.rect(M, top, W - 2 * M, 20, "F");
+    doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(...PURPLE);
+    let x = M; cols.forEach(([n, w]) => { doc.text(n.toUpperCase(), x + 6, top + 14); x += w; });
+    return top + 20;
+  };
+  // page 1 header
+  bar();
+  doc.setFont("times", "bold"); doc.setFontSize(26); doc.setTextColor(...INK); doc.text("Search Log", M, M + 20);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(...MUTED);
+  doc.text("Record every search for your essai sources, including the ones that go nowhere.", M, M + 38);
+  doc.setFont("helvetica", "bold"); doc.setTextColor(...INK); doc.text("Name", W - M - 260, M + 20);
+  doc.setDrawColor(...INK); doc.setLineWidth(0.8); doc.line(W - M - 226, M + 22, W - M, M + 22);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(11); doc.text(plain(state.name), W - M - 222, M + 18);
+  doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.text("My research question", M, M + 66);
+  doc.setDrawColor(...LINE); doc.line(M + 128, M + 68, W - M, M + 68); doc.line(M, M + 90, W - M, M + 90);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(10.5); doc.setTextColor(...INK);
+  const ql = doc.splitTextToSize(plain(state.question), W - 2 * M - 132);
+  if (ql[0]) doc.text(ql[0], M + 132, M + 64);
+  if (ql.length > 1) doc.text(doc.splitTextToSize(ql.slice(1).join(" "), W - 2 * M)[0], M, M + 86);
+  doc.setFont("times", "italic"); doc.setFontSize(12); doc.setTextColor(...TEAL);
+  doc.text("A dead end doesn't mean a dead topic. It means it's time to try a new approach.", M, M + 112);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(...MUTED);
+  doc.text("Change your search words, try a different kind of source, or search for one piece of your question.", M, M + 126);
+  let y = header(M + 138);
+  const rows = state.entries.length ? state.entries : [];
+  const total = Math.max(rows.length, 5);
+  for (let r = 0; r < total; r++) {
+    const e = rows[r];
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9);
+    const wrap = (t, w) => t ? doc.splitTextToSize(plain(t), w - 12) : [];
+    const terms = wrap(e && e.terms, cols[1][1]), finds = wrap(e && e.findings, cols[3][1]), plan = wrap(e && e.plan, cols[4][1]);
+    const other = e && !ECOS.includes(e.where);
+    const lines = Math.max(terms.length, finds.length, plan.length, 0);
+    const rh = Math.max(74, 18 + lines * 11.5 + 8, other ? 86 : 0);
+    if (!e && y + rh > H - M) break;
+    if (y + rh > H - M) { footer(); doc.addPage(); page++; bar();
+      doc.setFont("times", "bold"); doc.setFontSize(16); doc.setTextColor(...INK); doc.text("Search Log, continued", M, M + 12);
+      y = header(M + 26); }
+    doc.setDrawColor(...LINE); doc.setLineWidth(0.8); doc.rect(M, y, W - 2 * M, rh);
+    let x = M; cols.slice(0, -1).forEach(([, w]) => { x += w; doc.line(x, y, x, y + rh); });
+    doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...MUTED); doc.text(String(r + 1), M + 4, y + 10);
+    ECOS.forEach((l, i) => box(M + 8, y + 16 + i * 13, l, e && e.where === l));
+    if (other) { doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(...INK); doc.text(doc.splitTextToSize("Other: " + plain(e.where), cols[0][1] - 14)[0], M + 8, y + 76); }
+    const hx = M + cols[0][1] + cols[1][1] + 8;
+    OUTS.forEach(([k, l], i) => box(hx, y + 16 + i * 15, l, e && e.outcome === k));
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(...INK);
+    const put = (arr, colIdx) => { let cx = M; for (let c = 0; c < colIdx; c++) cx += cols[c][1]; arr.forEach((ln, i) => doc.text(ln, cx + 6, y + 18 + i * 11.5)); };
+    put(terms, 1); put(finds, 3); put(plan, 4);
+    y += rh;
+  }
+  footer();
+  return doc;
+}
+(async () => {
+  if (!window.jspdf) return;
+  let dl = null;
+  if (window.claude && window.claude.use) { try { dl = await window.claude.use("downloads"); } catch (e) {} }
+  const b = $("pdf"); b.hidden = false;
+  b.addEventListener("click", async () => {
+    $("pdfStatus").textContent = "";
+    const who = plain(state.name).trim();
+    try {
+      const fname = (who ? who + " " : "") + "Search Log.pdf";
+      if (!dl) { buildPDF().save(fname); $("pdfStatus").textContent = "PDF downloaded."; return; }
+      await dl.save({ filename: fname, data: buildPDF().output("blob") });
+      $("pdfStatus").textContent = "PDF ready.";
+    } catch (err) {
+      const c = err && err.code;
+      if (c === "declined") return;
+      if (c === "rate_limited") { $("pdfStatus").textContent = "A save window is already open. Finish that one first."; return; }
+      $("pdfStatus").textContent = "Downloads aren't available here. Use Copy log as text instead.";
+      if (c === "unavailable" || c === "not_granted" || c === "capability_disabled" || c === "capability_removed") b.hidden = true;
+    }
+  });
+})();
+
+load(); $("question").value = state.question || ""; $("name").value = state.name || ""; syncForm(); render();
+</script>
+
+</body>
+</html>
