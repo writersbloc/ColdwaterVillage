@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Essai Outline Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ENG 111 palette. One column of questions, a step rail on top, the outline as the last step. Single light theme by choice. */
+:root{
+  color-scheme:light;
+  --purple:#8A3FBF; --purple-bright:#9C4FD0; --blue:#5F7ADA; --teal:#22C2AF; --gold:#E0A63E; --coral:#E9615A;
+  --ink:#241D38; --muted:#5B5470; --paper:#FDF8EF; --card:#FFFFFF; --line:#E8D9F2; --tint:#F3EAFA;
+  --display:"Baloo 2","Trebuchet MS",sans-serif; --body:"Nunito Sans","Trebuchet MS","Segoe UI",Verdana,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px 56px}
+header.top{background:linear-gradient(135deg,var(--purple-bright),var(--blue));color:#fff;padding:22px 16px 18px}
+header.top .in{max-width:760px;margin:0 auto;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;justify-content:space-between}
+header.top h1{font-family:var(--display);font-size:28px;line-height:1.1;margin:0;text-wrap:balance}
+header.top p{margin:0;font-size:14px;opacity:.95}
+.stripe{height:6px;background:linear-gradient(to right,var(--gold) 0 25%,var(--teal) 25% 50%,var(--coral) 50% 75%,var(--purple) 75% 100%)}
+nav.steps{display:flex;gap:6px;overflow-x:auto;padding:14px 0 10px}
+nav.steps button{flex:0 0 auto;font:600 14px var(--body);color:var(--purple);background:var(--card);border:2px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer}
+nav.steps button[aria-current="step"]{background:var(--purple);border-color:var(--purple);color:#fff}
+nav.steps button.done::after{content:" ✓"}
+.note{font-size:14.5px;color:var(--muted);margin:0 0 14px}
+section.step{display:none}
+section.step.on{display:block}
+h2{font-family:var(--display);font-size:23px;line-height:1.2;color:var(--purple);margin:6px 0 10px;padding-bottom:6px;border-bottom:3px solid var(--line);text-wrap:balance}
+.field{display:flex;flex-direction:column;gap:5px;margin:0 0 16px}
+label,.lab{font-weight:700;font-size:16px}
+.hint{font-size:14px;color:var(--muted);font-weight:400}
+input[type=text],textarea,select{font:inherit;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:10px;padding:9px 11px;width:100%}
+textarea{min-height:74px;resize:vertical}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+.count{align-self:flex-end;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.checks label{font-weight:600;font-size:15px;background:var(--card);border:2px solid var(--line);border-radius:999px;padding:5px 12px;display:flex;gap:6px;align-items:center;cursor:pointer}
+.src{background:var(--card);border:2px solid var(--line);border-left:8px solid var(--line);border-radius:12px;padding:14px 14px 4px;margin:0 0 14px}
+.src[data-l="Answers"]{border-left-color:var(--teal)}
+.src[data-l="Complicates"]{border-left-color:var(--gold)}
+.src[data-l="Changes"]{border-left-color:var(--coral)}
+.src.exp{border-left-color:var(--purple-bright)}
+.link{background:var(--tint);border-radius:10px;padding:12px 12px 2px;margin:0 0 12px}
+.status{display:flex;flex-direction:column;gap:6px;margin:0 0 16px;padding:0;list-style:none}
+.status li{display:flex;gap:8px;align-items:center;justify-content:space-between;background:var(--card);border:2px solid var(--line);border-radius:10px;padding:6px 11px;font-size:15px}
+.status .ok{color:#14806F;font-weight:700;white-space:nowrap}.status .need{color:#A0361F;font-weight:700;white-space:nowrap}
+ol.path li.sub{margin-left:22px;border-style:dashed}
+ol.path li.fixed{border-color:var(--purple-bright)}
+ol.path li.fixed .t{font-style:italic}
+ol.path li.grp{background:var(--tint);border-color:var(--tint);font-weight:700}
+.src .head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.src .head b{font-family:var(--display);color:var(--purple);font-size:18px}
+.btn{font:700 15.5px var(--body);border-radius:10px;padding:9px 16px;border:2px solid var(--purple);background:var(--purple);color:#fff;cursor:pointer}
+.btn.ghost{background:var(--card);color:var(--purple)}
+.btn.small{font-size:13.5px;padding:4px 10px;border-color:var(--line);background:var(--card);color:var(--muted)}
+.btn:disabled{opacity:.4;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.navrow{justify-content:space-between;margin-top:20px}
+ol.path{list-style:none;margin:0 0 16px;padding:0;display:flex;flex-direction:column;gap:8px}
+ol.path li{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:9px 11px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ol.path .n{font-family:var(--display);color:var(--purple);font-size:19px;min-width:22px}
+ol.path .t{flex:1 1 180px;min-width:0;overflow-wrap:anywhere}
+.pill{font-size:12.5px;font-weight:700;color:#fff;border-radius:999px;padding:2px 9px;white-space:nowrap}
+.pill.Answers{background:var(--teal)}.pill.Complicates{background:#B8821F}.pill.Changes{background:var(--coral)}.pill.none{background:var(--muted)}
+ol.path label{font-size:14px;font-weight:600;display:flex;gap:5px;align-items:center}
+.range{display:flex;flex-direction:column;gap:4px}
+.range .ends{display:flex;justify-content:space-between;font-size:13.5px;color:var(--muted);gap:12px}
+input[type=range]{width:100%;accent-color:var(--purple)}
+#outline{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:18px 20px}
+#outline h3{font-family:var(--display);color:var(--purple);font-size:18px;margin:16px 0 4px}
+#outline h3:first-child{margin-top:0}
+#outline ul{margin:0;padding-left:20px}
+#outline li{margin:2px 0;overflow-wrap:anywhere}
+#outline .q{font-weight:700;font-size:18px;margin:0 0 2px}
+#outline .meta{color:var(--muted);font-size:14.5px;margin:0}
+#outline .empty{color:var(--muted);font-style:italic}
+#outline .turn{font-weight:700;color:var(--coral)}
+.warn{background:#FFF4DC;border:2px solid var(--gold);border-radius:10px;padding:8px 12px;font-size:15px;margin:0 0 12px}
+#toast{font-size:14.5px;color:var(--muted);min-height:1.4em}
+#copybox{display:none;margin-top:10px;min-height:180px;font-size:14px}
+.confirm{display:none;background:var(--tint);border-radius:10px;padding:10px 12px;margin-top:10px}
+.confirm.on{display:block}
+@media (prefers-reduced-motion:no-preference){.btn,nav.steps button{transition:background .15s,color .15s}}
+@media print{header.top,.stripe,nav.steps,.navrow,.note,.tools,#toast,.confirm,#copybox{display:none!important}body{background:#fff}section.step{display:none!important}section#s7{display:block!important}#outline{border:0;padding:0}}
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><h1>Essai Outline Builder</h1><p>ENG 111 · Writing Outcome Investigation</p></div></header>
+<div class="stripe"></div>
+<div class="wrap">
+  <nav class="steps" id="steps" aria-label="Steps"></nav>
+  <p class="note">Notes only. Save the sentences for the essai.</p>
+
+  <section class="step" id="s1">
+    <h2>My question</h2>
+    <div class="field"><label for="myname">My name</label><input type="text" id="myname" maxlength="80" autocomplete="name"></div>
+    <div class="field"><label for="question">My research question</label><textarea id="question" maxlength="260"></textarea></div>
+    <div class="field"><span class="lab">My question is</span>
+      <div class="checks">
+        <label><input type="checkbox" id="t_genuine"> Genuine</label>
+        <label><input type="checkbox" id="t_specific"> Specific</label>
+        <label><input type="checkbox" id="t_personal"> Personal</label>
+        <label><input type="checkbox" id="t_researchable"> Researchable</label>
+      </div></div>
+  </section>
+
+  <section class="step" id="s2">
+    <h2>My experiences</h2>
+    <p class="hint" style="margin:0 0 12px">Times this question showed up in my own life. A class, a job, home, online.</p>
+    <div id="exps"></div>
+    <div class="row" style="margin-bottom:18px"><button class="btn ghost" id="addexp" type="button">Add an experience</button></div>
+    <div class="field"><label for="before">What I believed before I searched</label><textarea id="before" maxlength="220"></textarea></div>
+    <div class="field"><label for="stakes">Why this matters to me</label><textarea id="stakes" maxlength="220"></textarea></div>
+  </section>
+
+  <section class="step" id="s3">
+    <h2>My sources</h2>
+    <p class="hint" style="margin:0 0 8px">Each experience needs a quote from a source.</p>
+    <ul class="status" id="status"></ul>
+    <div id="srcs"></div>
+    <div class="row"><button class="btn ghost" id="addsrc" type="button">Add a source</button><span class="hint">The essai needs at least three.</span></div>
+  </section>
+
+  <section class="step" id="s4">
+    <h2>My path</h2>
+    <div class="field"><span class="lab">The order I will tell it <span class="hint">Move the parts up or down.</span></span></div>
+    <ol class="path" id="path"></ol>
+  </section>
+
+  <section class="step" id="s5">
+    <h2>My voice</h2>
+    <div class="field range"><label for="presence">How present I will be on the page</label>
+      <input type="range" id="presence" min="1" max="5" step="1" value="3">
+      <div class="ends"><span>Reader first (Thomas)</span><span>Me on the page (Rodríguez, Parker)</span></div></div>
+    <div class="field"><label for="voicewhy">My reason for that choice</label><textarea id="voicewhy" maxlength="220"></textarea></div>
+    <div class="field"><label for="thread">A word or image I might come back to <span class="hint">Optional.</span></label><input type="text" id="thread" maxlength="80"></div>
+  </section>
+
+  <section class="step" id="s6">
+    <h2>Where I am now</h2>
+    <div class="field"><label for="now">What I think now</label><textarea id="now" maxlength="220"></textarea></div>
+    <div class="field"><label for="open">What is still open</label><textarea id="open" maxlength="220"></textarea></div>
+  </section>
+
+  <section class="step" id="s7">
+    <h2>My outline</h2>
+    <div id="warns"></div>
+    <div id="outline"></div>
+    <div class="row tools" style="margin-top:14px">
+      <button class="btn" id="pdf" type="button">Download my outline (PDF)</button>
+      <button class="btn ghost" id="copy" type="button">Copy my outline</button>
+    </div>
+    <div class="row tools" style="margin-top:10px">
+      <button class="btn ghost" id="example" type="button">Download Dr. Spiegel's example (PDF)</button>
+      <button class="btn small" id="reset" type="button">Start over</button>
+    </div>
+    <p id="toast" role="status"></p>
+    <textarea id="copybox" readonly aria-label="Outline text to copy"></textarea>
+    <div class="confirm" id="confirm"><span id="confirmtext"></span>
+      <div class="row" style="margin-top:8px"><button class="btn" id="yes" type="button">Yes</button><button class="btn ghost" id="no" type="button">Cancel</button></div></div>
+  </section>
+
+  <div class="row navrow"><button class="btn ghost" id="back" type="button">Back</button><button class="btn" id="next" type="button">Next</button></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+(function(){
+  var NAMES=["My question","My experiences","My sources","My path","My voice","Where I am now","My outline"];
+  var TEXT=["myname","question","before","stakes","voicewhy","thread","now","open"];
+  var CHECKS=["t_genuine","t_specific","t_personal","t_researchable"];
+  var RELS=["matches","is different from","explains","changes how I see"];
+  var STARTERS={Answers:"It answers...",Complicates:"I assumed...",Changes:"I was asking... Now I am asking..."};
+  var KEY="eng111-essai-outline-v3";
+  var seq=0;function uid(){seq++;return "e"+Date.now().toString(36)+seq}
+  function newSrc(){return {name:"",label:"",why:"",quote:"",exp:"",rel:"",link:""}}
+  function newExp(){return {id:uid(),name:"",what:"",then:""}}
+  function blank(){var s={step:0,presence:"3",order:[],exps:[newExp(),newExp()],srcs:[newSrc(),newSrc(),newSrc()]};TEXT.forEach(function(k){s[k]=""});CHECKS.forEach(function(k){s[k]=false});return s}
+  var S=blank();
+  try{var raw=localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);if(p&&Array.isArray(p.srcs)&&Array.isArray(p.exps)){S=Object.assign(blank(),p)}}}catch(e){}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+  function $(id){return document.getElementById(id)}
+  function el(tag,attrs,kids){var n=document.createElement(tag);for(var k in attrs||{}){if(k==="text")n.textContent=attrs[k];else if(k==="class")n.className=attrs[k];else n.setAttribute(k,attrs[k])}(kids||[]).forEach(function(c){n.appendChild(c)});return n}
+  function addCounter(t){var c=el("span",{class:"count"});function up(){c.textContent=t.value.length+" / "+t.maxLength}t.addEventListener("input",up);up();t.parentNode.appendChild(c);return up}
+  function field(labelText,control,id){control.id=id;return el("div",{class:"field"},[el("label",{for:id,text:labelText}),control])}
+
+  var counters={};
+  TEXT.forEach(function(k){var n=$(k);n.value=S[k]||"";n.addEventListener("input",function(){S[k]=n.value;save();marks()});if(n.tagName==="TEXTAREA")counters[k]=addCounter(n)});
+  CHECKS.forEach(function(k){var n=$(k);n.checked=!!S[k];n.addEventListener("change",function(){S[k]=n.checked;save()})});
+  $("presence").value=S.presence;$("presence").addEventListener("input",function(){S.presence=this.value;save()});
+
+  function expIndex(id){for(var i=0;i<S.exps.length;i++){if(S.exps[i].id===id)return i}return -1}
+  function expName(i){var e=S.exps[i];return e?(e.name.trim()||("Experience "+(i+1))):""}
+  function expUsed(e){return !!(e.name.trim()||e.what.trim())}
+  function quotesFor(id){return S.srcs.filter(function(s){return s.exp===id&&s.quote.trim()})}
+
+  function renderExps(){
+    var box=$("exps");box.textContent="";
+    S.exps.forEach(function(e,i){
+      var card=el("div",{class:"src exp"});
+      var rm=el("button",{class:"btn small",type:"button",text:"Remove"});rm.disabled=S.exps.length<=1;
+      rm.addEventListener("click",function(){S.srcs.forEach(function(s){if(s.exp===e.id){s.exp="";s.rel="";s.link=""}});S.exps.splice(i,1);save();renderExps();marks()});
+      card.appendChild(el("div",{class:"head"},[el("b",{text:"Experience "+(i+1)}),rm]));
+      var name=el("input",{type:"text",maxlength:"50",placeholder:"A few words"});name.value=e.name;
+      name.addEventListener("input",function(){e.name=name.value;save()});
+      card.appendChild(field("A short name for it",name,"exp_name_"+i));
+      var what=el("textarea",{maxlength:"220"});what.value=e.what;
+      what.addEventListener("input",function(){e.what=what.value;save();marks()});
+      card.appendChild(field("What happened",what,"exp_what_"+i));addCounter(what);
+      var then=el("textarea",{maxlength:"200"});then.value=e.then;
+      then.addEventListener("input",function(){e.then=then.value;save()});
+      card.appendChild(field("What I thought or felt then",then,"exp_then_"+i));addCounter(then);
+      box.appendChild(card);
+    });
+    $("addexp").disabled=S.exps.length>=5;
+  }
+  $("addexp").addEventListener("click",function(){if(S.exps.length<5){S.exps.push(newExp());save();renderExps();var n=$("exp_name_"+(S.exps.length-1));if(n)n.focus()}});
+
+  function renderStatus(){
+    var ul=$("status");ul.textContent="";
+    S.exps.forEach(function(e,i){
+      if(!expUsed(e))return;
+      var n=quotesFor(e.id).length;
+      ul.appendChild(el("li",{},[el("span",{text:expName(i)}),el("span",{class:n?"ok":"need",text:n?(n+(n===1?" quote":" quotes")):"Needs a quote"})]));
+    });
+    if(!ul.children.length)ul.appendChild(el("li",{},[el("span",{text:"No experiences yet. Add them in step 2."})]));
+  }
+  function renderSrcs(){
+    var box=$("srcs");box.textContent="";
+    S.srcs.forEach(function(s,i){
+      var card=el("div",{class:"src","data-l":s.label||""});
+      var rm=el("button",{class:"btn small",type:"button",text:"Remove"});rm.disabled=S.srcs.length<=1;
+      rm.addEventListener("click",function(){S.srcs.splice(i,1);save();renderSrcs();marks()});
+      card.appendChild(el("div",{class:"head"},[el("b",{text:"Source "+(i+1)}),rm]));
+      var name=el("input",{type:"text",maxlength:"140",placeholder:"Author and title"});name.value=s.name;
+      name.addEventListener("input",function(){s.name=name.value;save();marks()});
+      card.appendChild(field("Source",name,"src_name_"+i));
+      var sel=el("select",{},[el("option",{value:"",text:"Choose one"})].concat(["Answers","Complicates","Changes"].map(function(l){return el("option",{text:l})})));sel.value=s.label;
+      card.appendChild(field("It answers, complicates, or changes my question",sel,"src_label_"+i));
+      var why=el("textarea",{maxlength:"200",placeholder:STARTERS[s.label]||""});why.value=s.why;
+      why.addEventListener("input",function(){s.why=why.value;save()});
+      card.appendChild(field("Why",why,"src_why_"+i));addCounter(why);
+      sel.addEventListener("change",function(){s.label=sel.value;card.setAttribute("data-l",s.label);why.placeholder=STARTERS[s.label]||"";save();marks()});
+      var link=el("div",{class:"link"});
+      var q=el("textarea",{maxlength:"220",placeholder:"Copy the words exactly, with quotation marks."});q.value=s.quote;
+      q.addEventListener("input",function(){s.quote=q.value;save();renderStatus();marks()});
+      link.appendChild(field("A quote from this source",q,"src_quote_"+i));addCounter(q);
+      var esel=el("select",{},[el("option",{value:"",text:"None yet"})].concat(S.exps.filter(expUsed).map(function(e){return el("option",{value:e.id,text:expName(expIndex(e.id))})})));esel.value=s.exp;if(esel.value!==s.exp){s.exp=""}
+      esel.addEventListener("change",function(){s.exp=esel.value;save();renderStatus();marks()});
+      link.appendChild(field("The experience this quote connects to",esel,"src_exp_"+i));
+      var rsel=el("select",{},[el("option",{value:"",text:"Choose one"})].concat(RELS.map(function(r){return el("option",{text:r})})));rsel.value=s.rel;
+      rsel.addEventListener("change",function(){s.rel=rsel.value;save()});
+      link.appendChild(field("This quote ... what happened to me",rsel,"src_rel_"+i));
+      var lk=el("textarea",{maxlength:"200"});lk.value=s.link;
+      lk.addEventListener("input",function(){s.link=lk.value;save()});
+      link.appendChild(field("How they connect",lk,"src_link_"+i));addCounter(lk);
+      card.appendChild(link);
+      box.appendChild(card);
+    });
+    $("addsrc").disabled=S.srcs.length>=8;
+    renderStatus();
+  }
+  $("addsrc").addEventListener("click",function(){if(S.srcs.length<8){S.srcs.push(newSrc());save();renderSrcs();var n=$("src_name_"+(S.srcs.length-1));if(n)n.focus()}});
+
+  function srcRow(s,i){
+    return el("li",{class:"sub"},[el("span",{class:"t",text:s.name.trim()||("Source "+(i+1))}),el("span",{class:"pill "+(s.label||"none"),text:s.label||"Not sorted"})]);
+  }
+  var FIXED={before:"What I believed before I searched",stakes:"Why this matters to me"};
+  function pathOrder(){
+    var valid={};if(S.before.trim())valid.before=1;if(S.stakes.trim())valid.stakes=1;
+    S.exps.forEach(function(e){if(expUsed(e))valid[e.id]=1});
+    var out=(S.order||[]).filter(function(k){if(valid[k]){delete valid[k];return true}return false});
+    var front=["before","stakes"].filter(function(k){return valid[k]});
+    var back=S.exps.map(function(e){return e.id}).filter(function(k){return valid[k]});
+    return front.concat(out,back);
+  }
+  function renderPath(){
+    var ol=$("path");ol.textContent="";
+    var order=pathOrder();
+    order.forEach(function(key,pos){
+      var label=FIXED[key]||expName(expIndex(key));
+      var up=el("button",{class:"btn small",type:"button",text:"Up","aria-label":"Move "+label+" up"});up.disabled=pos===0;
+      var dn=el("button",{class:"btn small",type:"button",text:"Down","aria-label":"Move "+label+" down"});dn.disabled=pos===order.length-1;
+      function move(d){var o=pathOrder();var t=o[pos];o[pos]=o[pos+d];o[pos+d]=t;S.order=o;save();renderPath()}
+      up.addEventListener("click",function(){move(-1)});dn.addEventListener("click",function(){move(1)});
+      ol.appendChild(el("li",FIXED[key]?{class:"fixed"}:{},[el("span",{class:"n",text:String(pos+1)}),el("span",{class:"t",text:label}),up,dn]));
+      if(!FIXED[key])S.srcs.forEach(function(s,k){if(s.exp===key)ol.appendChild(srcRow(s,k))});
+    });
+    var loose=[];S.srcs.forEach(function(s,k){if((s.exp===""||expIndex(s.exp)<0)&&(s.name.trim()||s.quote.trim()))loose.push(k)});
+    if(loose.length){ol.appendChild(el("li",{class:"grp",text:"Sources not connected to an experience yet"}));loose.forEach(function(k){ol.appendChild(srcRow(S.srcs[k],k))})}
+    if(!ol.children.length)ol.appendChild(el("li",{text:"Nothing to order yet. Add experiences and sources first."}));
+  }
+
+  function filled(i){
+    if(i===0)return !!S.question.trim();
+    if(i===1)return S.exps.some(function(e){return e.what.trim()})&&!!S.before.trim();
+    if(i===2){var used=S.exps.filter(expUsed);return S.srcs.filter(function(s){return s.name.trim()&&s.label}).length>=3&&used.length>0&&used.every(function(e){return quotesFor(e.id).length>0})}
+    if(i===3)return pathOrder().length>1;
+    if(i===4)return !!S.voicewhy.trim();
+    if(i===5)return !!(S.now.trim()||S.open.trim());
+    return false;
+  }
+  function marks(){var bs=$("steps").children;for(var i=0;i<bs.length;i++){bs[i].classList.toggle("done",i<6&&filled(i))}}
+  function go(i){
+    S.step=Math.max(0,Math.min(6,i));save();
+    for(var k=1;k<=7;k++){$("s"+k).classList.toggle("on",k===S.step+1)}
+    var bs=$("steps").children;for(var j=0;j<bs.length;j++){if(j===S.step)bs[j].setAttribute("aria-current","step");else bs[j].removeAttribute("aria-current")}
+    $("back").disabled=S.step===0;$("next").style.visibility=S.step===6?"hidden":"visible";
+    $("next").textContent=S.step===5?"See my outline":"Next";
+    if(S.step===1)renderExps();
+    if(S.step===2)renderSrcs();
+    if(S.step===3)renderPath();
+    if(S.step===6)renderOutline();
+    marks();
+    if(bs[S.step]&&bs[S.step].scrollIntoView)bs[S.step].scrollIntoView({block:"nearest",inline:"center"});
+  }
+  NAMES.forEach(function(n,i){var b=el("button",{type:"button",text:(i+1)+". "+n});b.addEventListener("click",function(){go(i)});$("steps").appendChild(b)});
+  $("back").addEventListener("click",function(){go(S.step-1);window.scrollTo(0,0)});
+  $("next").addEventListener("click",function(){go(S.step+1);window.scrollTo(0,0)});
+
+  var VOICE={1:"Reader first. I stay mostly in the background.",2:"Mostly reader first, with a little of me.",3:"A balance of my reader and me.",4:"Mostly me on the page.",5:"Me on the page throughout."};
+  function srcItem(s,k,withLink){
+    var sub=[];
+    if(s.quote.trim())sub.push("Quote: "+s.quote.trim());
+    if(withLink&&(s.rel||s.link.trim()))sub.push("Connection: "+(s.rel?(s.quote.trim()?"this quote ":"this source ")+s.rel+" what happened to me. ":"")+s.link.trim());
+    if(s.why.trim())sub.push("Why it "+(s.label?s.label.toLowerCase():"matters")+": "+s.why.trim());
+    return {text:"Source: "+(s.name.trim()||"Source "+(k+1))+(s.label?" ("+s.label.toLowerCase()+")":""),sub:sub};
+  }
+  /* Each item is a string or {text, sub:[string|item], turn}. */
+  function outlineData(){
+    var out=[];
+    function sec(title,items){out.push({title:title,items:items.filter(function(x){return x&&String(x.text||x).trim()})})}
+    var story=[];
+    pathOrder().forEach(function(key){
+      var tag=story.length===0?" (my essai could open here)":"";
+      if(key==="before"){story.push({text:"What I believed before I searched"+tag,sub:[S.before.trim()]});return}
+      if(key==="stakes"){story.push({text:"Why this matters to me"+tag,sub:[S.stakes.trim()]});return}
+      var i=expIndex(key),e=S.exps[i];
+      var sub=[];if(e.what.trim())sub.push("What happened: "+e.what.trim());if(e.then.trim())sub.push("Then: "+e.then.trim());
+      var n=0;S.srcs.forEach(function(s,k){if(s.exp===e.id){sub.push(srcItem(s,k,true));if(s.quote.trim())n++}});
+      story.push({text:expName(i)+tag+(n?"":" (needs a quote)"),sub:sub});
+    });
+    sec("My story, with my sources",story);
+    var loose=[];S.srcs.forEach(function(s,k){if((s.exp===""||expIndex(s.exp)<0)&&(s.name.trim()||s.quote.trim()||s.why.trim()))loose.push(srcItem(s,k,false))});
+    if(loose.length)sec("Sources not connected to my story yet",loose);
+    sec("Where I am now",[S.now,S.open?("Still open: "+S.open):""]);
+    sec("My voice",[VOICE[S.presence],S.voicewhy?("Because: "+S.voicewhy):"",S.thread?("Coming back to: "+S.thread):""]);
+    sec("Works Cited to build in MLA",S.srcs.filter(function(s){return s.name.trim()}).map(function(s){return s.name.trim()}));
+    return out;
+  }
+  function liFor(it){
+    if(typeof it==="string")return el("li",{text:it});
+    var li=el("li",{text:it.text});
+    if(it.sub&&it.sub.length)li.appendChild(el("ul",{},it.sub.map(liFor)));
+    return li;
+  }
+  function renderOutline(){
+    var w=$("warns");w.textContent="";
+    var named=S.srcs.filter(function(s){return s.name.trim()}).length;
+    if(named<3)w.appendChild(el("p",{class:"warn",text:"I have "+named+" of the three sources the essai needs."}));
+    var need=S.exps.filter(function(e){return expUsed(e)&&!quotesFor(e.id).length}).length;
+    if(need)w.appendChild(el("p",{class:"warn",text:need+" of my experiences "+(need===1?"needs":"need")+" a quote from a source."}));
+    var o=$("outline");o.textContent="";
+    o.appendChild(el("p",{class:"q",text:S.question.trim()||"My research question goes here."}));
+    var tests=CHECKS.filter(function(k){return S[k]}).map(function(k){return k.slice(2)});
+    if(tests.length)o.appendChild(el("p",{class:"meta",text:"My question is "+tests.join(", ")}));
+    outlineData().forEach(function(sec){
+      o.appendChild(el("h3",{text:sec.title}));
+      if(!sec.items.length){o.appendChild(el("p",{class:"empty",text:"Nothing here yet."}));return}
+      o.appendChild(el("ul",{},sec.items.map(liFor)));
+    });
+  }
+  function outlineText(){
+    var tests=CHECKS.filter(function(k){return S[k]}).map(function(k){return k.slice(2)});
+    var L=["ESSAI OUTLINE","Question: "+(S.question.trim()||""),(tests.length?"My question is "+tests.join(", "):""),""];
+    function lines(it,d){var pad=new Array(d+1).join("    ")+"  - ";
+      if(typeof it==="string"){L.push(pad+it);return}
+      L.push(pad+it.text);(it.sub||[]).forEach(function(x){lines(x,d+1)})}
+    outlineData().forEach(function(sec){L.push(sec.title.toUpperCase());if(!sec.items.length)L.push("  (nothing yet)");sec.items.forEach(function(it){lines(it,0)});L.push("")});
+    return L.join("\n");
+  }
+  function toast(t){$("toast").textContent=t}
+  $("copy").addEventListener("click",function(){
+    var text=outlineText();var box=$("copybox");
+    function fallback(){box.style.display="block";box.value=text;box.focus();box.select();toast("Select the text in the box, copy it, and paste it into a doc.")}
+    try{navigator.clipboard.writeText(text).then(function(){toast("Copied. Paste it into a doc to keep it.")},fallback)}catch(e){fallback()}
+  });
+  var framed=false;try{framed=window.self!==window.top}catch(e){framed=true}
+  var dlReady=null;try{if(window.claude&&window.claude.use)dlReady=window.claude.use("downloads")}catch(e){}
+  function withState(x,fn){var keep=S;S=x;try{return fn()}finally{S=keep}}
+  function clean(t){return String(t).replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/\u2026/g,"...").replace(/[\u2013\u2014]/g,"-").replace(/\u00B7/g,"-")}
+  function makePdf(){
+    var doc=new window.jspdf.jsPDF({unit:"pt",format:"letter"});
+    var W=612,M=54,y=0,maxW=W-M*2;
+    function room(h){if(y+h>738){doc.addPage();y=M}}
+    function para(text,size,style,color,indent,gap){
+      doc.setFont("helvetica",style||"normal");doc.setFontSize(size);doc.setTextColor(color[0],color[1],color[2]);
+      var lines=doc.splitTextToSize(clean(text),maxW-(indent||0));
+      lines.forEach(function(ln){room(size*1.35);doc.text(ln,M+(indent||0),y+size);y+=size*1.35});
+      y+=(gap||0);
+    }
+    var INK=[36,29,56],PUR=[138,63,191],MUT=[91,84,112];
+    doc.setFillColor(138,63,191);doc.rect(0,0,W,64,"F");
+    doc.setFont("helvetica","bold");doc.setFontSize(20);doc.setTextColor(255,255,255);doc.text("Essai Outline",M,40);
+    doc.setFont("helvetica","normal");doc.setFontSize(10.5);doc.text("ENG 111 - Dr. Spiegel",W-M,40,{align:"right"});
+    y=82;
+    if(S.myname.trim())para(S.myname.trim(),11,"normal",MUT,0,4);
+    para(S.question.trim()||"My research question goes here.",14,"bold",INK,0,2);
+    var tests=CHECKS.filter(function(k){return S[k]}).map(function(k){return k.slice(2)});
+    if(tests.length)para("My question is "+tests.join(", "),10,"normal",MUT,0,0);
+    function item(it,d){
+      var ind=14+d*16;
+      var text=typeof it==="string"?it:it.text;
+      room(16);doc.setFillColor(INK[0],INK[1],INK[2]);doc.circle(M+ind-8,y+7,1.6,"F");
+      var obj=typeof it!=="string";
+      para(text,10.5,d===0&&obj?"bold":"normal",INK,ind,1);
+      if(obj&&it.sub)it.sub.forEach(function(x){item(x,d+1)});
+    }
+    outlineData().forEach(function(sec){
+      y+=10;room(40);para(sec.title,13,"bold",PUR,0,2);
+      doc.setDrawColor(232,217,242);doc.setLineWidth(1.5);doc.line(M,y,W-M,y);y+=5;
+      if(!sec.items.length){para("Nothing here yet.",10.5,"italic",MUT,14,0);return}
+      sec.items.forEach(function(it){item(it,0)});
+    });
+    return doc;
+  }
+  function fileSafe(t){return clean(t).replace(/[^A-Za-z0-9 _-]/g,"").trim().replace(/\s+/g,"-").slice(0,40)}
+  function savePdf(state,filename){
+    if(!window.jspdf||!window.jspdf.jsPDF){toast("The PDF maker didn't load. Use Copy my outline instead.");return}
+    var doc;try{doc=withState(state,makePdf)}catch(e){if(window.console)console.error(e);toast("The PDF couldn't be made. Use Copy my outline instead.");return}
+    toast("Getting the PDF ready...");
+    Promise.resolve(dlReady).then(function(dl){
+      if(dl){return dl.save({filename:filename,data:doc.output("blob")}).then(function(){toast("Saved "+filename+".")},function(e){toast(e&&e.code==="declined"?"Download cancelled.":"The download didn't work here. Use Copy my outline instead.")})}
+      if(!framed){doc.save(filename);toast("Saved "+filename+".");return}
+      toast("Downloads aren't available in this view. Use Copy my outline instead.");
+    },function(){toast("Downloads aren't available in this view. Use Copy my outline instead.")});
+  }
+  $("pdf").addEventListener("click",function(){savePdf(S,"Essai-Outline"+(S.myname.trim()?"-"+fileSafe(S.myname):"")+".pdf")});
+
+  var pending=null;
+  function ask(text,fn){$("confirmtext").textContent=text;pending=fn;$("confirm").classList.add("on");$("yes").focus()}
+  $("no").addEventListener("click",function(){pending=null;$("confirm").classList.remove("on")});
+  $("yes").addEventListener("click",function(){var f=pending;pending=null;$("confirm").classList.remove("on");if(f)f()});
+  function load(n){S=n;save();TEXT.forEach(function(k){$(k).value=S[k]||"";if(counters[k])counters[k]()});CHECKS.forEach(function(k){$(k).checked=!!S[k]});$("presence").value=S.presence;renderExps();renderSrcs();$("copybox").style.display="none";toast("")}
+  $("reset").addEventListener("click",function(){ask("Erase everything I have typed and start over?",function(){load(blank());go(0)})});
+  function exampleState(){
+    var x=blank();
+    x.myname="Dr. Spiegel";
+    x.question="If \"I am\" is the answer to the question \"what is a Hokie\" that I was taught at orientation, then why am I so uncomfortable using it? What story gets left out when I do?";
+    x.t_genuine=x.t_specific=x.t_personal=x.t_researchable=true;
+    x.before="The mascot's history is too complicated to answer quickly.";
+    x.stakes="Tech was the formative years of my life and when I became who I am.";
+    x.exps=[
+      {id:"ex1",name:"Orientation",what:"Outside Squires my orientation group is taught a cheer and then the \"I am\" answer.",then:"Uncomfortable. It felt cringe - long before Gen Z declared everything cringe."},
+      {id:"ex2",name:"High School",what:"A friend and I have high school pictures taken in VT (me) and UVA (her) sweatshirts. I learn from her that the Hokie is considered a castrated Turkey by the rival team.",then:"Self-conscious and annoyed."},
+      {id:"ex3",name:"Teaching",what:"My students ask and I don't find any answer comfortable.",then:"Uncomfortable. My mind has yet to settle on an answer. It's like Facebook's \"it's complicated status\""},
+      {id:"ex4",name:"The shooting",what:"When I begin research an odd number of sources tie back to the shooting.",then:"It reminds me of Nikki's words: we are Virginia Tech. I don't know if I'm a Hokie, but Hokie Nation? We are Virginia Tech."}
+    ];
+    x.order=["before","ex1","ex2","ex3","ex4","stakes"];
+    x.srcs=[
+      {name:"\"Student Orientation Staff Works Hard to Introduce New Hokies to Virginia Tech,\" Virginia Tech news release, 2015",label:"Changes",why:"Doesn't answer my question. Shows orientation is scripted, just like the answer.",quote:"\"...trying to remember our lines...\"",exp:"ex1",rel:"explains",link:"The leaders had lines to learn. Then they handed one to us."},
+      {name:"\"What's a Hokie? I Am\" t-shirt, Reddit post, r/VirginiaTech, 15 Nov. 2016",label:"Complicates",why:"This alum calls the shirt corny and still goes looking for one.",quote:"\"...my corny (but awesome) t-shirt...\"",exp:"ex1",rel:"is different from",link:"We agree it's corny. I stopped at cringe. This alum got to awesome."},
+      {name:"\"The Hokie Pokie: This Is What It's All About,\" reader letters, Orlando Sentinel, 12 Dec. 1999",label:"Answers",why:"Rival fans were putting the castrated turkey story in print in 1999.",quote:"\"Then they switched to the name Hokie, which means a castrated turkey.\"",exp:"ex2",rel:"matches",link:"This is my friend's version, from a Florida State fan, in a newspaper."},
+      {name:"Connolly, \"Hokie Hi!: A Primer for Marshall Fans Making the Trek for the Game at Virginia Tech,\" Charleston Daily Mail, 9 Sept. 2002",label:"Answers",why:"A student editor gets the question from a rival's paper and says people now mostly mean the bird.",quote:"\"(The cheer) is the official answer but now it's pretty much the Hokie Bird.\"",exp:"ex2",rel:"explains",link:"Even on campus the answer had become the bird. No wonder a rival went for the turkey."},
+      {name:"The Key Play, fan blog post, July 2013",label:"Complicates",why:"He could tell the whole history and says the line instead.",quote:"\"Instead I simply say, 'it's not and I am.'\"",exp:"ex3",rel:"explains",link:"The line is what you say when the history takes too long. I can't make myself say it to students."},
+      {name:"Dunn, \"What's a Hokie? A Seminole's Dinner,\" Tallahassee Democrat, 29 Dec. 1999",label:"Answers",why:"Their own spokesperson gets asked and says a Hokie is a rabid fan.",quote:"\"It's a rabid, rabid fan.\"",exp:"ex3",rel:"is different from",link:"He has a quick answer. I still don't."},
+      {name:"Giovanni, \"We Are Virginia Tech,\" convocation address, 17 Apr. 2007",label:"Changes",why:"I was asking what a Hokie is. This poem makes me ask who \"we\" are.",quote:"",exp:"ex4",rel:"changes how I see",link:"The title names a \"we\" I can say without flinching."},
+      {name:"Cummings, commencement speech, College of Science magazine, Sept. 2022",label:"Complicates",why:"This graduate built her commencement speech around the line.",quote:"\"...where we honor all members of [the] Hokie Nation.\"",exp:"ex4",rel:"matches",link:"She says Hokie Nation too. That is the part I can say."}
+    ];
+    x.presence="3";x.voicewhy="The discomfort is mine. The history belongs to a lot of other people.";x.thread="it's complicated";
+    x.now="\"I am\" skips the history. That may be what bothers me.";
+    x.open="Can I say \"We are Virginia Tech\" and still not say \"I am\"?";
+    return x;
+  }
+  $("example").addEventListener("click",function(){savePdf(exampleState(),"Dr-Spiegel-Essai-Outline-Example.pdf")});
+
+  renderExps();renderSrcs();go(S.step||0);
+})();
+</script>
+</body>
+</html>
