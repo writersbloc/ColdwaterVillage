@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Countdown to the End of Fall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:#0f2a44; --deep:#1d4a6e; --ice:#dff1fb; --frost:#f5fbff; --glacier:#7cc4e4;
+    --snow:#ffffff; --purple:#500778; --berry:#c2185b; --pine:#2e6b5a; --ink:#183247; --muted:#5d7990;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Nunito,system-ui,sans-serif;color:var(--ink);
+    background:linear-gradient(180deg,var(--night) 0,var(--deep) 340px,var(--ice) 340px,var(--frost) 100%);min-height:100vh;overflow-x:hidden}
+  .snow{position:fixed;inset:0;pointer-events:none;z-index:0}
+  .flake{position:absolute;top:-10px;color:#fff;opacity:.8;animation:fall linear infinite}
+  @keyframes fall{to{transform:translateY(110vh) translateX(30px)}}
+  @media (prefers-reduced-motion:reduce){.flake{display:none}}
+  main{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:28px 18px 60px}
+  header{text-align:center;color:#fff}
+  .sign{display:inline-block;font-family:Fredoka;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:.8rem;
+    background:var(--purple);padding:6px 14px;border-radius:999px;border:2px solid #fff3}
+  h1{font-family:Fredoka;font-weight:700;font-size:clamp(1.9rem,6vw,3rem);margin:12px 0 4px;line-height:1.1}
+  .sub{opacity:.85;margin:0}
+  .village{display:block;width:100%;height:auto;margin-top:10px}
+  .card{background:var(--snow);border-radius:20px;box-shadow:0 10px 30px #0f2a4422;padding:22px;margin-top:20px;border:1px solid #cfe6f3}
+  .hero{text-align:center;margin-top:-6px}
+  .hero h2{font-family:Fredoka;font-weight:600;margin:0 0 4px;color:var(--purple);font-size:1.15rem}
+  .hero p.target{margin:0 0 14px;color:var(--muted)}
+  .clock{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+  .unit{background:linear-gradient(180deg,#eaf6fd,#cfe9f7);border-radius:16px;min-width:78px;padding:12px 8px;border:2px solid #fff}
+  .unit b{display:block;font-family:Fredoka;font-size:2.2rem;color:var(--night);line-height:1}
+  .unit span{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+  .bar{height:14px;background:#e3f1f9;border-radius:999px;overflow:hidden;margin:18px 0 6px}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--glacier),var(--purple));border-radius:999px}
+  .barlabel{font-size:.85rem;color:var(--muted)}
+  .next{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  .next .icon{font-size:2.4rem}
+  .next h3{margin:0;font-family:Fredoka;font-weight:600;color:var(--purple)}
+  .next p{margin:2px 0 0}
+  .next .left{margin-left:auto;font-family:Fredoka;font-weight:600;font-size:1.4rem;color:var(--night)}
+  h2.sec{font-family:Fredoka;font-weight:600;color:var(--night);margin:0 0 12px;font-size:1.3rem}
+  .cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+  .dow{text-align:center;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding-bottom:2px}
+  .day{min-height:78px;border-radius:12px;background:#f1f8fc;padding:6px;font-size:.72rem;position:relative;border:2px solid transparent}
+  .day .n{font-family:Fredoka;font-weight:600;font-size:1rem;color:var(--night)}
+  .day.month{background:transparent;min-height:auto}
+  .day.past{opacity:.45}
+  .day.past .n::after{content:" ❄";font-size:.7rem}
+  .day.today{border-color:var(--purple);background:#f3e9f8}
+  .day.today::before{content:"today";position:absolute;top:6px;right:6px;font-size:.6rem;font-weight:700;color:var(--purple);text-transform:uppercase}
+  .tag{display:block;margin-top:3px;border-radius:6px;padding:2px 4px;color:#fff;font-weight:700;line-height:1.2}
+  .tag.exam{background:var(--deep)}
+  .tag .short{display:none}
+  .tag.last{background:var(--pine)}
+  .tag.class{background:#e2a93b;color:#3a2a05}
+  .tag.conf{background:#3f8fb8}
+  .tag.due{background:var(--purple)}
+  .tag.break{background:#9bb4c6}
+  .day.due{background:#efe3f6;border-color:#cdb1de}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:.8rem;color:var(--muted)}
+  .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+  .exams{display:grid;gap:10px}
+  .exam{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:12px 14px;border-radius:14px;background:#f1f8fc;border-left:6px solid var(--deep)}
+  .exam.done{opacity:.5;border-left-color:#9bb4c6}
+  .exam.done .cd::before{content:"✓ "}
+  .date{text-align:center;font-family:Fredoka;line-height:1}
+  .date small{display:block;font-size:.7rem;text-transform:uppercase;color:var(--muted);letter-spacing:.08em}
+  .date b{font-size:1.6rem;color:var(--night)}
+  .exam h4{margin:0;font-family:Fredoka;font-weight:600;font-size:1.02rem}
+  .exam p{margin:2px 0 0;font-size:.85rem;color:var(--muted)}
+  .cd{font-family:Fredoka;font-weight:600;color:var(--purple);text-align:right;font-size:.95rem}
+  .note{font-size:.8rem;color:var(--muted);margin:14px 0 0}
+  footer{text-align:center;font-size:.8rem;color:var(--muted);margin-top:26px}
+  footer a{color:var(--purple)}
+  @media (max-width:560px){
+    .day{min-height:64px;padding:3px;font-size:.58rem}.cal{gap:3px}.tag .full{display:none}.tag .short{display:inline}.tag{padding:2px 1px;font-size:.52rem;text-align:center;letter-spacing:-.01em;overflow:hidden}.day{padding:2px}.day.today::before{display:none}
+    .tag{padding:1px 3px}
+    .unit{min-width:64px}.unit b{font-size:1.7rem}
+    .exam{grid-template-columns:auto 1fr}.cd{grid-column:1/-1;text-align:left}
+  }
+</style>
+</head>
+<body>
+<div class="snow" id="snow" aria-hidden="true"></div>
+<main>
+  <header>
+    <span class="sign">Fall 2026 Notice Board</span>
+    <h1>The Long Thaw Toward Winter Break</h1>
+    <p class="sub">Dr. Spiegel's Fall 2026 countdown at NOVA Alexandria</p>
+    <svg class="village" viewBox="0 0 900 150" role="img" aria-label="A snowy village with mountains, pine trees, and small cottages">
+      <path d="M0 120 L120 40 L210 100 L320 20 L440 105 L560 35 L680 95 L790 30 L900 90 L900 150 L0 150Z" fill="#2f5f86"/>
+      <path d="M120 40 L95 57 L120 52 L140 60Z M320 20 L292 40 L320 34 L345 42Z M560 35 L534 53 L560 48 L583 55Z M790 30 L764 48 L790 43 L812 50Z" fill="#fff"/>
+      <rect x="0" y="118" width="900" height="32" fill="#dff1fb"/>
+      <g fill="#2e6b5a">
+        <path d="M60 120 L75 85 L90 120Z"/><path d="M95 120 L108 92 L121 120Z"/>
+        <path d="M770 120 L786 82 L802 120Z"/><path d="M810 120 L823 95 L836 120Z"/>
+        <path d="M420 120 L432 96 L444 120Z"/>
+      </g>
+      <g>
+        <rect x="200" y="92" width="54" height="28" fill="#f5fbff"/><path d="M194 94 L227 70 L260 94Z" fill="#500778"/><rect x="221" y="104" width="12" height="16" fill="#1d4a6e"/>
+        <rect x="290" y="98" width="42" height="22" fill="#f5fbff"/><path d="M285 100 L311 80 L337 100Z" fill="#7cc4e4"/><rect x="298" y="104" width="9" height="8" fill="#ffd66b"/>
+        <rect x="520" y="88" width="70" height="32" fill="#f5fbff"/><path d="M512 90 L555 62 L598 90Z" fill="#1d4a6e"/><rect x="531" y="98" width="10" height="9" fill="#ffd66b"/><rect x="569" y="98" width="10" height="9" fill="#ffd66b"/>
+        <rect x="620" y="96" width="44" height="24" fill="#f5fbff"/><path d="M614 98 L642 78 L670 98Z" fill="#500778"/>
+      </g>
+    </svg>
+  </header>
+
+  <section class="card hero" aria-live="polite">
+    <h2>Time left until grades are due</h2>
+    <p class="target">Wednesday, December 16, 2026, end of day</p>
+    <div class="clock">
+      <div class="unit"><b id="d">0</b><span>days</span></div>
+      <div class="unit"><b id="h">0</b><span>hours</span></div>
+      <div class="unit"><b id="m">0</b><span>minutes</span></div>
+      <div class="unit"><b id="s">0</b><span>seconds</span></div>
+    </div>
+    <div class="bar" aria-hidden="true"><i id="prog" style="width:0"></i></div>
+    <div class="barlabel" id="proglabel"></div>
+  </section>
+
+  <section class="card next" id="nextCard">
+    <div class="icon" aria-hidden="true">🏔️</div>
+    <div>
+      <h3 id="nextTitle">Next up</h3>
+      <p id="nextDetail"></p>
+    </div>
+    <div class="left" id="nextLeft"></div>
+  </section>
+
+  <section class="card">
+    <h2 class="sec">The road out of town</h2>
+    <div class="cal" id="cal"></div>
+    <div class="legend">
+      <span><i style="background:#3f8fb8"></i>Optional conferences</span>
+      <span><i style="background:#9bb4c6"></i>Thanksgiving break</span>
+      <span><i style="background:#e2a93b"></i>Class days</span>
+      <span><i style="background:#2e6b5a"></i>Last day of classes</span>
+      <span><i style="background:#1d4a6e"></i>Your final exams</span>
+      <span><i style="background:#500778"></i>Grades due</span>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 class="sec">Your final exams</h2>
+    <div class="exams" id="exams"></div>
+    <p class="note">Exam slots follow NOVA's Fall 2026 schedule for each section's regular start time. Each exam is scheduled for 100 minutes. Rooms shown are your regular classrooms. The exam period runs December 8 through December 14.</p>
+  </section>
+
+  <footer>Dates from the <a href="https://www.nvcc.edu/academics/calendar/fall2026-exams.html">NOVA Fall 2026 Final Exam Schedule</a>. Times are Eastern.</footer>
+</main>
+
+<script>
+  const ET = "-05:00";
+  const at = (d, t) => new Date(`2026-${d}T${t}:00${ET}`);
+  const exams = [
+    {course:"ENG 111-012A", name:"College Composition I", start:at("12-08","10:00"), end:at("12-08","11:40"), time:"10:00 to 11:40 a.m.", room:"AA-0260", reg:"Tue/Thu 11:10"},
+    {course:"ENG 111-006A", name:"College Composition I", start:at("12-09","10:00"), end:at("12-09","11:40"), time:"10:00 to 11:40 a.m.", room:"AA-0260", reg:"Mon/Wed 11:10"},
+    {course:"ENG 111-F03A", name:"College Composition I (111/EDE)", start:at("12-10","12:00"), end:at("12-10","13:40"), time:"12:00 to 1:40 p.m.", room:"AA-0260", reg:"Tue/Thu 12:45"},
+    {course:"ENG 230-001A", name:"Mystery in Literature and Film", start:at("12-14","14:00"), end:at("12-14","15:40"), time:"2:00 to 3:40 p.m.", room:"AA-0455", reg:"Mon/Wed 2:20"},
+  ];
+  const milestones = [
+    {title:"Optional conferences", when:at("11-23","11:00"), end:at("11-23","16:00"), detail:"Monday, November 23, 11 a.m. to 4 p.m."},
+    {title:"Optional conferences", when:at("11-24","11:00"), end:at("11-24","16:00"), detail:"Tuesday, November 24, 11 a.m. to 4 p.m."},
+    {title:"Thanksgiving break", when:at("11-25","00:00"), end:at("11-29","23:59"), allDay:true, nowLabel:"On break", detail:"Wednesday, November 25 through Sunday, November 29."},
+    {title:"Last day of instruction", when:at("12-07","23:59"), detail:"Monday, December 7. Classes wrap up."},
+    ...exams.map(e=>({title:`${e.course} final`, when:e.start, end:e.end, detail:`${e.start.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",timeZone:"America/New_York"})}, ${e.time}, ${e.room}`})),
+    {title:"Grades due", when:at("12-16","23:59"), detail:"Wednesday, December 16. Post final grades in SIS."},
+  ];
+  const DEADLINE = at("12-16","23:59");
+  const TERM_START = at("08-24","00:00");
+
+  const pad = n => String(n).padStart(2,"0");
+  function parts(ms){ms=Math.max(0,ms);const s=Math.floor(ms/1000);return {d:Math.floor(s/86400),h:Math.floor(s%86400/3600),m:Math.floor(s%3600/60),s:s%60};}
+  function shortLeft(ms){const p=parts(ms);return p.d>0?`${p.d}d ${p.h}h`:`${p.h}h ${pad(p.m)}m`;}
+  const etKey = d => d.toLocaleDateString("en-CA",{timeZone:"America/New_York"});
+
+  function tick(){
+    const now = new Date();
+    const p = parts(DEADLINE-now);
+    d.textContent=p.d; h.textContent=pad(p.h); m.textContent=pad(p.m); s.textContent=pad(p.s);
+    const pct = Math.min(100,Math.max(0,(now-TERM_START)/(DEADLINE-TERM_START)*100));
+    prog.style.width = pct.toFixed(1)+"%";
+    proglabel.textContent = DEADLINE-now<=0 ? "Fall is officially done. Go put your feet up." : `The semester is ${pct.toFixed(0)}% behind you.`;
+
+    const next = milestones.find(x => (x.end||x.when) > now);
+    if(next){
+      const live = next.end && now>=next.when;
+      nextTitle.textContent = live ? (next.allDay ? `Now: ${next.title}` : `Happening now: ${next.title}`) : `Next up: ${next.title}`;
+      nextDetail.textContent = next.detail;
+      nextLeft.textContent = live ? (next.nowLabel || "In progress") : shortLeft(next.when-now);
+    } else {
+      nextTitle.textContent = "Nothing left on the board";
+      nextDetail.textContent = "Grades are in. Winter break has arrived.";
+      nextLeft.textContent = "";
+    }
+
+    document.querySelectorAll("#exams .exam").forEach((el,i)=>{
+      const e=exams[i], cd=el.querySelector(".cd");
+      if(now>=e.end){el.classList.add("done");cd.textContent="Done";}
+      else if(now>=e.start){cd.textContent="In progress";}
+      else cd.textContent=shortLeft(e.start-now);
+    });
+  }
+
+  function buildExams(){
+    exams.forEach(e=>{
+      const el=document.createElement("div"); el.className="exam";
+      const dow=e.start.toLocaleDateString("en-US",{weekday:"short",timeZone:"America/New_York"});
+      const day=e.start.toLocaleDateString("en-US",{day:"numeric",timeZone:"America/New_York"});
+      el.innerHTML=`<div class="date"><small>${dow} Dec</small><b>${day}</b></div>
+        <div><h4>${e.course}: ${e.name}</h4><p>${e.time} in ${e.room}. Regular class meets ${e.reg}.</p></div>
+        <div class="cd"></div>`;
+      exams_el.appendChild(el);
+    });
+  }
+
+  function buildCal(){
+    const todayKey = etKey(new Date());
+    ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(x=>{const c=document.createElement("div");c.className="dow";c.textContent=x;cal.appendChild(c);});
+    const events = {};
+    const add=(k,cls,txt,short)=>{(events[k]=events[k]||[]).push([cls,txt,short||txt]);};
+    add("2026-11-23","conf","Conferences 11 to 4","Conf.");
+    add("2026-11-24","conf","Conferences 11 to 4","Conf.");
+    ["25","26","27","28","29"].forEach(d=>add(`2026-11-${d}`,"break","Break","Break"));
+    [["11-30","111 & 230"],["12-01","111 & 111/EDE"],["12-02","111 & 230"],["12-03","111 & 111/EDE"]].forEach(([d,c])=>add(`2026-${d}`,"class",`Class: ${c}`,"Class"));
+    add("2026-12-07","last","Last class day","Last<br>day");
+    exams.forEach(e=>{const t=e.start.toLocaleTimeString("en-US",{hour:"numeric",timeZone:"America/New_York"}).replace(" ","").toLowerCase();add(etKey(e.start),"exam",`${e.course.replace(/A$/,"")} ${t}`,`${e.course.split(" ")[1].split("-")[0]}<br>${t}`);});
+    add("2026-12-16","due","Grades due","Grades<br>due");
+    const start = new Date(2026,10,22), end = new Date(2026,11,19);
+    for(let dt=new Date(start); dt<=end; dt.setDate(dt.getDate()+1)){
+      const k = `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
+      const c=document.createElement("div"); c.className="day";
+      if(k<todayKey) c.classList.add("past");
+      if(k===todayKey) c.classList.add("today");
+      if(k==="2026-12-16") c.classList.add("due");
+      const label = dt.getDate()===1 || k==="2026-11-22" ? `${dt.toLocaleDateString("en-US",{month:"short"})} ${dt.getDate()}` : dt.getDate();
+      c.innerHTML=`<span class="n">${label}</span>`+(events[k]||[]).map(([cls,t,sh])=>`<span class="tag ${cls}"><span class="full">${t}</span><span class="short">${sh}</span></span>`).join("");
+      cal.appendChild(c);
+    }
+  }
+
+  function buildSnow(){
+    const box=document.getElementById("snow");
+    for(let i=0;i<36;i++){
+      const f=document.createElement("span"); f.className="flake"; f.textContent=Math.random()>.5?"❄":"•";
+      f.style.left=Math.random()*100+"vw"; f.style.fontSize=(8+Math.random()*12)+"px";
+      f.style.animationDuration=(8+Math.random()*12)+"s"; f.style.animationDelay=(-Math.random()*20)+"s";
+      box.appendChild(f);
+    }
+  }
+
+  const exams_el=document.getElementById("exams");
+  buildSnow(); buildExams(); buildCal(); tick(); setInterval(tick,1000);
+</script>
+</body>
+</html>
